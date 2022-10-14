@@ -5,7 +5,7 @@
   "author": "Nicholas Engelbert <nicholas.ge1301@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "dev": "ts-node-dev src/app.ts",
+    "dev": "ts-node-dev src/server.ts",
     "typeorm": "typeorm-ts-node-commonjs"
   },
   "dependencies": {
