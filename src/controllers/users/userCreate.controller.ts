@@ -1,3 +1,4 @@
+import { instanceToPlain } from "class-transformer";
 import { Request, Response } from "express";
 import userCreateService from "../../services/users/userCreate.service";
 
@@ -11,7 +12,7 @@ const userCreateController = async (req: Request, res: Response) => {
 		is_adm,
 		profile_img,
 	});
-	return res.status(201).json(newUser);
+	return res.status(201).json(instanceToPlain(newUser));
 };
 
 export default userCreateController;

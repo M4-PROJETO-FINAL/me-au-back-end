@@ -14,7 +14,8 @@ const userUpdateService = async ({
 	profile_img,
 }: IUserUpdateProps) => {
 	const userRepository = AppDataSource.getRepository(User);
-	const userUpdated = await userRepository.update(id, {
+	const userUpdated = { email, name, cpf, profile_img };
+	await userRepository.update(id, {
 		email,
 		name,
 		cpf,

@@ -10,11 +10,9 @@ export const validateUserExists = async (
 ) => {
 	const { id } = req.params;
 	const userRepository = AppDataSource.getRepository(User);
-
-	const user = await userRepository.findOneBy({ id });
-
+	const allUsers = await userRepository.find();
+	const user = allUsers.find((u) => u.id === id);
 	if (!user) throw new AppError("User id not found", 404);
-
 	next();
 };
 

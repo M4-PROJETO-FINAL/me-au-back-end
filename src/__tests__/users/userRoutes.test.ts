@@ -63,7 +63,7 @@ describe("/users", () => {
 		expect(response.body[0]).toHaveProperty("email");
 		expect(response.body[0]).toHaveProperty("is_adm");
 		expect(response.body[0]).not.toHaveProperty("password");
-		expect(response.status).toBe(401);
+		expect(response.status).toBe(200);
 	});
 
 	test("GET /users -  Must be able to get user info if is not adm", async () => {
@@ -72,25 +72,71 @@ describe("/users", () => {
 			.send(mockedUserLogin);
 		const response = await request(app)
 			.get("/users")
-			.set("Authorization", `Beare ${userLoginResponse.body.token}`);
+			.set("Authorization", `Bearer ${userLoginResponse.body.token}`);
 
 		expect(response.body).toHaveProperty("id");
 		expect(response.body).toHaveProperty("name");
 		expect(response.body).toHaveProperty("email");
 		expect(response.body).toHaveProperty("is_adm");
 		expect(response.body).not.toHaveProperty("password");
-		expect(response.status).toBe(401);
+		expect(response.status).toBe(200);
 	});
 
-	test("GET /users -  should not be able to use this route without authentication", async () => {
+	test("PATCH /users/:id -  should not to be able to update user with invalid id", async () => {
+		const newValuesUser = {
+			name: "Joao",
+			email: "joao_testing22@gmail.com",
+			cpf: "232.323.442-24",
+		};
 		const userLoginResponse = await request(app)
 			.post("/login")
 			.send(mockedUserLogin);
+
 		const response = await request(app)
-			.get("/users")
-			.set("Authorization", `Bearer ${userLoginResponse.body.token}`);
+			.patch("/users/21332asd-5dbe-423a-23fas-dkfb02sd23cf")
+			.set("Authorization", `Bearer ${userLoginResponse.body.token}`)
+			.send(newValuesUser);
 
 		expect(response.body).toHaveProperty("message");
-		expect(response.status).toBe(403);
+		expect(response.status).toBe(404);
 	});
+
+	// test("PATCH /users/:id -  should not be able to update user without authentication", async () => {
+	// 	const newValuesUser = {
+	// 		name: "Joao",
+	// 		email: "joao_testing22@gmail.com",
+	// 		cpf: "232.323.442-24",
+	// 	};
+	// 	const response = await request(app)
+	// 		.patch("/users/")
+	// 		.send(newValuesUser);
+
+	// 	expect(response.body).toHaveProperty("message");
+	// 	expect(response.status).toBe(401);
+	// });
+
+	// test("PATCH /users/:id -  should not be able to update is_adm field", async () => {
+	// 	const newValuesUser = {
+	// 		is_adm: true,
+	// 	};
+	// 	const userLoginResponse = await request(app)
+	// 		.post("/login")
+	// 		.send(mockedUserLogin);
+
+	// 	const a = await request(app)
+	// 		.patch("/users/21332asd-5dbe-423a-23fas-dkfb02sd23cf")
+	// 		.set("Authorization", `Bearer ${userLoginResponse.body.token}`)
+	// 		.send(newValuesUser);
+
+	// 	const user = await request(app).get("/users").
+	// 	set("Authorization", `Bearer ${userLoginResponse.body.token}`)
+	// 	.send()
+
+	// 	const response = await request(app)
+	// 		.patch("/users/")
+	// 		.send(newValuesUser);
+
+	// 	expect(response.body).toHaveProperty("message");
+	// 	expect(response.status).toBe(401);
+	// });
 });

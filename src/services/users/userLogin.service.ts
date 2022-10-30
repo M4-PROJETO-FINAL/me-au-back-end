@@ -13,10 +13,10 @@ const UserLoginService = async ({
 	const userRepository = AppDataSource.getRepository(User);
 
 	const user = await userRepository.findOneBy({ email });
-	if (!user) throw new AppError("Wrong e-mail or password.");
+	if (!user) throw new AppError("Wrong e-mail or password.", 403);
 
-	if (!bcrypt.compare(password, user.password))
-		throw new AppError("Wrong e-mail or password.");
+	if (!bcrypt.compareSync(password, user.password))
+		throw new AppError("Wrong e-mail or password.", 403);
 
 	const token = jwt.sign(
 		{
