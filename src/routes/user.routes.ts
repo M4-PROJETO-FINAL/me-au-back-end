@@ -18,17 +18,21 @@ import {
 const routes = Router();
 
 export const userRoutes = () => {
-	routes.post('', validateUserCreate(userCreateSchema), userCreateController);
+	routes.post(
+		'/users',
+		validateUserCreate(userCreateSchema),
+		userCreateController
+	);
 	routes.post('/login', UserLoginController);
-	routes.get('', authUser, UserGetController);
+	routes.get('/users', authUser, UserGetController);
 	routes.patch(
-		'/:id',
+		'/users/:id',
 		validateUserExists,
 		// validateUserUpdate(userUpdateSchema),
 		userUpdateController,
 		authUser
 	);
-	routes.delete('/:id', validateUserExists, authUser, validateIsAdm);
+	routes.delete('/users/:id', validateUserExists, authUser, validateIsAdm);
 
 	return routes;
 };

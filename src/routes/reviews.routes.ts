@@ -4,10 +4,12 @@ import { Router } from "express";
 import reviewCreateController from "../controllers/reviews/reviewCreate.controller";
 import reviewGetController from "../controllers/reviews/reviewGet.controller";
 
-const reviewsRoutes = Router();
+const routes = Router();
 
-reviewsRoutes.post("", authUser, validateReviewCreate, reviewCreateController);
+export const reviewsRoutes = () => {
+    routes.post("", authUser, validateReviewCreate, reviewCreateController);
 
-reviewsRoutes.get("", reviewGetController);
+    routes.get("", reviewGetController);
 
-export default reviewsRoutes;
+    return routes;
+}
