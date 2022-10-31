@@ -14,25 +14,29 @@ import {
 	userUpdateSchema,
 	validateUserUpdate,
 } from '../middlewares/validateUserUpdate';
+import userDeleteController from '../controllers/users/userDelete.controller';
 
 const routes = Router();
 
-export const userRoutes = () => {
-	routes.post(
-		'/users',
-		validateUserCreate(userCreateSchema),
-		userCreateController
-	);
-	routes.post('/login', UserLoginController);
-	routes.get('/users', authUser, UserGetController);
-	routes.patch(
-		'/users/:id',
-		validateUserExists,
-		// validateUserUpdate(userUpdateSchema),
-		userUpdateController,
-		authUser
-	);
-	routes.delete('/users/:id', validateUserExists, authUser, validateIsAdm);
-
-	return routes;
-};
+routes.post(
+	'/users',
+	validateUserCreate(userCreateSchema),
+	userCreateController
+);
+routes.post('/login', UserLoginController);
+routes.get('/users', authUser, UserGetController);
+routes.patch(
+	'/users/:id',
+	validateUserExists,
+	authUser,
+	// validateUserUpdate(userUpdateSchema),
+	userUpdateController
+);
+routes.delete(
+	'/users/:id',
+	validateUserExists,
+	authUser,
+	validateIsAdm,
+	userDeleteController
+);
+export default routes;
