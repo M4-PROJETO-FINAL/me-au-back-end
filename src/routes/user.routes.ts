@@ -15,6 +15,7 @@ import {
 	validateUserUpdate,
 } from '../middlewares/validateUserUpdate';
 import userDeleteController from '../controllers/users/userDelete.controller';
+import userDeleteController from "../controllers/users/userDelete.controller";
 
 const routes = Router();
 
@@ -33,10 +34,11 @@ routes.patch(
 	userUpdateController
 );
 routes.delete(
-	'/users/:id',
+	"/users/:id",
 	validateUserExists,
 	authUser,
 	validateIsAdm,
 	userDeleteController
 );
+
 export default routes;
