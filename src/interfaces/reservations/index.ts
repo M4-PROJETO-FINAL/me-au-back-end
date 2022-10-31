@@ -4,7 +4,7 @@ import { IRoom } from "./../rooms/index";
 export interface IReservationRequest {
 	checkin: string;
 	checkout: string;
-	services: IService[];
+	services?: IService[];
 	pet_rooms: IRoom[];
 }
 
