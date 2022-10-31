@@ -1,4 +1,5 @@
 import { IEditPet, IPetRequest } from "../../interfaces/pets/index";
+import { IReservationRequest } from "../../interfaces/reservations";
 import { IReviewRequest } from "../../interfaces/reviews/index";
 import { IUserLogin, IUserRequest } from "../../interfaces/users/index";
 
@@ -60,3 +61,54 @@ export const mockedEditPet: IEditPet = {
   neutered: true,
   vaccinated: true,
 };
+
+export const mockedReservation: IReservationRequest = {
+  checkin: "2022-08-20",
+  checkout: "2022-08-23",
+  pet_rooms: [
+      {
+          pet_id: "",
+          room_type_id: ""        
+      }
+  ],
+  services: [
+      {
+          id: "2fda0d8b-b847-4d38-8ce9-2c5b6b86f475",
+          amount: 2
+      }
+  ]
+}
+
+export const mockedReservationDog: IReservationRequest = {
+  checkin: "2022-08-20",
+  checkout: "2022-08-23",
+  pet_rooms: [
+      {
+          pet_id: "",
+          room_type_id: "ad5154de-0fd5-4798-9133-e408c887ce99"        
+      }
+  ],
+  services: [
+      {
+          id: "2fda0d8b-b847-4d38-8ce9-2c5b6b86f475",
+          amount: 2
+      }
+  ]
+}
+
+export const mockedReservationCat: IReservationRequest = {
+  checkin: "2022-08-20",
+  checkout: "2022-08-23",
+  pet_rooms: [
+      {
+          pet_id: "",
+          room_type_id: "1f632692-d764-4365-bcc4-b6b90124759f"        
+      }
+  ],
+  services: [
+      {
+          id: "2fda0d8b-b847-4d38-8ce9-2c5b6b86f475",
+          amount: 2
+      }
+  ]
+}
