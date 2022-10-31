@@ -41,17 +41,37 @@ export const ReservationCreateService = async ({
 	// [idService1, idService2, idService3, id ]
 	// [serviços faltava name, descrição] ====>
 
-	const allReservationsServices = services?.map((serv) => {
-		const service = allServices.find((service) => service.id === serv.id);
-		const reservationService = reservationServicesRepository.create({
-			amount: serv.amount,
-			reservation,
-			service,
-		});
-		reservationServicesRepository.save(reservationService);
-		console.log(reservationService);
-		return reservationService;
-	});
+	let allReservationsServices: ReservationService[] = [];
+	console.log("asddassda2222");
+	if (services) {
+		for (let i = 0; i < (services?.length || 0); i++) {
+			const serv = services[i];
+			const service = allServices.find((service) => service.id === serv.id);
+			console.log(service);
+			const reservationService = reservationServicesRepository.create({
+				amount: serv.amount,
+				reservation,
+				service,
+			});
+			allReservationsServices.push(reservationService);
+			await reservationServicesRepository.save(reservationService);
+		}
+	}
+	console.log("33333");
+
+	// const allReservationsServices = await Promise.all<any>(
+	// 	services?.map(async (serv) => {
+	// 		const service = allServices.find((service) => service.id === serv.id);
+	// 		const reservationService = reservationServicesRepository.create({
+	// 			amount: serv.amount,
+	// 			reservation,
+	// 			service,
+	// 		});
+	// 		await reservationServicesRepository.save(reservationService);
+	// 		return reservationService;
+	// 	})
+	// );
+	console.log(allReservationsServices, "asdassda");
 
 	const reservationPetRepository = AppDataSource.getRepository(ReservationPet);
 
@@ -73,8 +93,10 @@ export const ReservationCreateService = async ({
 			room: roomChoose[0],
 			reservation: reservation,
 		});
+		reservationPetRepository.save(reservationPet);
 		return reservationPet;
 	});
+
 	reservation.reservation_services = allReservationsServices!;
 	reservation.reservation_pets = allReservationPets!;
 	reservationRepository.save(reservation);

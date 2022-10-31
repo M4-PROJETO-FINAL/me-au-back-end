@@ -36,13 +36,19 @@ export class Reservation {
 
 	@OneToMany(
 		() => ReservationPet,
-		(reservation_pet) => reservation_pet.reservation
+		(reservation_pet) => reservation_pet.reservation,
+		{
+			cascade: true,
+		}
 	)
 	reservation_pets: ReservationPet[];
 
 	@OneToMany(
 		() => ReservationService,
-		(reservation_service) => reservation_service.reservation
+		(reservation_service) => reservation_service.reservation,
+		{
+			cascade: true,
+		}
 	)
 	reservation_services: ReservationService[];
 }
