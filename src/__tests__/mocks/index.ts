@@ -34,7 +34,25 @@ export const mockedAdminLogin: IUserLogin = {
 
 export const mockedReview: IReviewRequest = {
   review_text: "Adorei a equipe, super simpática e ótimo atendimento!",
-  star: "5",
+  stars: 5,
+};
+
+export const mockedReviewInvalidStarZero: IReviewRequest = {
+  review_text: "Adorei a equipe, super simpática e ótimo atendimento!",
+  stars: 0,
+};
+
+export const mockedReviewInvalidStarsSix: IReviewRequest = {
+  review_text: "Adorei a equipe, super simpática e ótimo atendimento!",
+  stars: 6,
+};
+
+export const mockedReviewInvalidStarsWithout: Object = {
+  review_text: "Adorei a equipe, super simpática e ótimo atendimento!",
+};
+
+export const mockedReviewInvalidTextWithout: Object = {
+  stars: 6,
 };
 
 export const mockedCat: IPetRequest = {
