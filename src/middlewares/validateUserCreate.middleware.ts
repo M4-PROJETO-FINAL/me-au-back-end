@@ -10,7 +10,7 @@ export const userCreateSchema: SchemaOf<IUserRequest> = yup.object().shape({
 	name: yup.string().required(),
 	email: yup.string().required().email(),
 	password: yup.string().required(),
-	is_adm: yup.boolean().required(),
+	is_adm: yup.boolean(),
 	cpf: yup.string(),
 	profile_img: yup.string(),
 });
