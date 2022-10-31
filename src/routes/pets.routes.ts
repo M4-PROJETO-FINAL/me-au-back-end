@@ -5,11 +5,8 @@ import { authUser } from '../middlewares/authUser.middleware';
 
 const routes = Router();
 
-export const petRoutes = () => {
-	routes.post('', authUser, petCreateController);
-	routes.get('', authUser, petGetController);
-	routes.patch('/:id', authUser);
-	routes.delete('/:id', authUser);
-
-	return routes;
-};
+routes.post('', authUser, petCreateController);
+routes.get('', authUser, petGetController);
+routes.patch('/:id', authUser);
+routes.delete('/:id', authUser);
+export default routes;
