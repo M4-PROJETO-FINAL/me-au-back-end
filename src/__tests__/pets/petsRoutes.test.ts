@@ -45,7 +45,6 @@ describe("/pets", () => {
     const userLoginResponse = await request(app)
       .post("/login")
       .send(mockedUserLogin);
-    console.log(userLoginResponse.body);
     const response = await request(app)
       .post("/pets")
       .set("Authorization", `Bearer ${userLoginResponse.body.token}`)
@@ -68,7 +67,7 @@ describe("/pets", () => {
       .post("/pets")
       .set("Authorization", `Bearer ${adminLoginResponse.body.token}`)
       .send(mockedDog);
-    adminCreatedPet = response.body;
+    adminCreatedPet = adminResponse.body;
     expect(adminResponse.body).toHaveProperty("id");
     expect(adminResponse.body.name).toEqual(mockedDog.name);
     expect(adminResponse.body.type).toEqual(mockedDog.type);
@@ -115,8 +114,10 @@ describe("/pets", () => {
       .patch(`/pets/${adminCreatedPet.id}`)
       .send(mockedEditPet)
       .set("Authorization", `Bearer ${userLoginResponse.body.token}`);
+    console.log("adminCreatedPet", adminCreatedPet);
+    console.log("userLoginResponse", userLoginResponse.body.token);
 
-    expect(response.status).toHaveProperty("message");
+    expect(response.body).toHaveProperty("message");
     expect(response.status).toBe(403);
   });
 
