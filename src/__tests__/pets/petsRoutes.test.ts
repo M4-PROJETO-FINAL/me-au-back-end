@@ -45,7 +45,6 @@ describe("/pets", () => {
     const userLoginResponse = await request(app)
       .post("/login")
       .send(mockedUserLogin);
-    console.log(userLoginResponse.body);
     const response = await request(app)
       .post("/pets")
       .set("Authorization", `Bearer ${userLoginResponse.body.token}`)
