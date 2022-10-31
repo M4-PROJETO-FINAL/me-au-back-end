@@ -38,7 +38,7 @@ const petUpdateService = async (
       docile: newPetData.docile,
     });
   } else {
-    throw new AppError("You don't have permission");
+    throw new AppError("You don't have permission", 403);
   }
 
   const pet = await petRepository.findOneBy({ id: petId });

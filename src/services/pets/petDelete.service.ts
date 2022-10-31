@@ -26,7 +26,7 @@ const petDeleteService = async (
   } else if (is_adm) {
     await petRepository.delete(petId);
   } else {
-    throw new AppError("You don't have permission");
+    throw new AppError("You don't have permission", 403);
   }
 };
 
