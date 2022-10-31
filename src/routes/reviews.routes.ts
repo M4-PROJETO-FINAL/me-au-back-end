@@ -6,8 +6,8 @@ import reviewGetController from '../controllers/reviews/reviewGet.controller';
 
 const routes = Router();
 
-routes.post('', authUser, validateReviewCreate, reviewCreateController);
+routes.post('/reviews', authUser, validateReviewCreate, reviewCreateController);
 
-routes.get('', reviewGetController);
+routes.get('/reviews', reviewGetController);
 
 export default routes;
