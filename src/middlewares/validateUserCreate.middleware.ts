@@ -15,6 +15,14 @@ export const userCreateSchema: SchemaOf<IUserRequest> = yup.object().shape({
 	profile_img: yup.string(),
 });
 
+export const userUpdateSchema: SchemaOf<IUserUpdate> = yup.object().shape({
+	name: yup.string(),
+	email: yup.string().email(),
+	password: yup.string(),
+	cpf: yup.string(),
+	profile_img: yup.string(),
+});
+
 export const validateUserCreate =
 	(schema: SchemaOf<IUserRequest>) =>
 	async (req: Request, res: Response, next: NextFunction) => {
