@@ -7,6 +7,8 @@ import { Request, Response } from "express";
 import userRoutes from "./routes/user.routes";
 import handleErrorMiddleware from "./middlewares/handleError.middleware";
 import petsRoutes from "./routes/pets.routes";
+import reviewRoutes from "./routes/reviews.routes";
+import serviceRoutes from "./routes/services.routes";
 import roomsRoutes from "./routes/rooms.routes";
 
 const app = express();
@@ -16,10 +18,8 @@ app.use(express.json());
 app.use(userRoutes);
 app.use("/pets", petsRoutes);
 app.use("/rooms", roomsRoutes);
+app.use(reviewRoutes);
+app.use(serviceRoutes);
 app.use(handleErrorMiddleware);
-
-app.get("/", (req: Request, res: Response) => {
-  return res.json({ message: "Hello World!" });
-});
 
 export default app;

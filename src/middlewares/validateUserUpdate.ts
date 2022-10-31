@@ -1,5 +1,5 @@
-import { IUserRequest, IUserUpdate } from "../interfaces/users";
-import { Express, Request, Response, NextFunction } from "express";
+import { IUserUpdate } from "../interfaces/users";
+import { Request, Response, NextFunction } from "express";
 
 import * as yup from "yup";
 
