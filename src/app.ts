@@ -21,7 +21,6 @@ app.use("/pets", petsRoutes);
 app.use("/rooms", roomsRoutes);
 app.use(reviewRoutes);
 app.use(serviceRoutes);
-app.use("/pets", petsRoutes);
 app.use("/reservations", reservationRoutes);
 app.use(handleErrorMiddleware);
 

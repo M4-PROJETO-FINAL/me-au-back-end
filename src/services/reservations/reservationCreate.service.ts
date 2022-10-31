@@ -40,6 +40,7 @@ export const ReservationCreateService = async ({
 	const allServices = await serviceRepository.find();
 	// [idService1, idService2, idService3, id ]
 	// [serviços faltava name, descrição] ====>
+
 	const allReservationsServices = services?.map((serv) => {
 		const service = allServices.find((service) => service.id === serv.id);
 		const reservationService = reservationServicesRepository.create({
@@ -48,6 +49,7 @@ export const ReservationCreateService = async ({
 			service,
 		});
 		reservationServicesRepository.save(reservationService);
+		console.log(reservationService);
 		return reservationService;
 	});
 
