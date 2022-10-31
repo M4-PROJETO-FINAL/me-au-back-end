@@ -1,13 +1,13 @@
-import { authUser } from "../middlewares/authUser.middleware";
-import { validateReviewCreate } from "../middlewares/validateReviewCreate.middleware";
-import { Router } from "express";
-import reviewCreateController from "../controllers/reviews/reviewCreate.controller";
-import reviewGetController from "../controllers/reviews/reviewGet.controller";
+import { authUser } from '../middlewares/authUser.middleware';
+import { validateReviewCreate } from '../middlewares/validateReviewCreate.middleware';
+import { Router } from 'express';
+import reviewCreateController from '../controllers/reviews/reviewCreate.controller';
+import reviewGetController from '../controllers/reviews/reviewGet.controller';
 
-const reviewsRoutes = Router();
+const routes = Router();
 
-reviewsRoutes.post("", authUser, validateReviewCreate, reviewCreateController);
+routes.post('/reviews', authUser, validateReviewCreate, reviewCreateController);
 
-reviewsRoutes.get("", reviewGetController);
+routes.get('/reviews', reviewGetController);
 
-export default reviewsRoutes;
+export default routes;
