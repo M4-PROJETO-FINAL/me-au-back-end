@@ -14,6 +14,7 @@ import {
 	userUpdateSchema,
 	validateUserUpdate,
 } from "../middlewares/validateUserUpdate";
+import userDeleteController from "../controllers/users/userDelete.controller";
 
 const routes = Router();
 
@@ -27,10 +28,16 @@ routes.get("/users", authUser, UserGetController);
 routes.patch(
 	"/users/:id",
 	validateUserExists,
+	authUser,
 	// validateUserUpdate(userUpdateSchema),
-	userUpdateController,
-	authUser
+	userUpdateController
 );
-routes.delete("/users/:id", validateUserExists, authUser, validateIsAdm);
+routes.delete(
+	"/users/:id",
+	validateUserExists,
+	authUser,
+	validateIsAdm,
+	userDeleteController
+);
 
 export default routes;

@@ -5,13 +5,14 @@ import userUpdateService from "../../services/users/userUpdate.service";
 const userUpdateController = async (req: Request, res: Response) => {
 	const { id } = req.params;
 
-	const { cpf, email, name, profile_img } = req.body;
+	const { cpf, email, name, profile_img, is_adm } = req.body;
 	const userDataUpdated = await userUpdateService({
 		id,
 		email,
 		name,
 		cpf,
 		profile_img,
+		is_adm,
 	});
 	return res.status(200).json(instanceToPlain(userDataUpdated));
 };
