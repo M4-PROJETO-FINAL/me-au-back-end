@@ -1,6 +1,8 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
 export class inserts1667221589793 implements MigrationInterface {
+  name = "inserts1667221589793";
+
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
       `INSERT INTO "services" ("name", "description", "price") VALUES ('Vacina', 'Vacinação para seu pet, com preço a combinar (dependendo de qual a vacina)', 0), ('Banho', 'Banho para deixar o seu pet cheirosinho!', 30), ('Tosa', 'Tosa completa para deixar seu pet no estilo', 30), ('Massagem', 'Uma sessão relaxante de massagem', 60), ('Natação', 'Aula de natação em uma piscina enorme e aquecida', 50), ('Ração', 'Uma porção de ração premium gourmet', 10)`
