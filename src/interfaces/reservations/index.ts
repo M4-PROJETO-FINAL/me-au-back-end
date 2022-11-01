@@ -1,5 +1,5 @@
 import { IService } from "./../services/index";
-import { IRoom } from "./../rooms/index";
+import { IPetRoom } from "./../rooms/index";
 
 export interface IReservationRequest {
 	checkin: string;
