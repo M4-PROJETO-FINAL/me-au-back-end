@@ -42,22 +42,18 @@ export const ReservationCreateService = async ({
 	// [serviços faltava name, descrição] ====>
 
 	let allReservationsServices: ReservationService[] = [];
-	console.log("asddassda2222");
 	if (services) {
 		for (let i = 0; i < (services?.length || 0); i++) {
 			const serv = services[i];
 			const service = allServices.find((service) => service.id === serv.id);
-			console.log(service);
 			const reservationService = reservationServicesRepository.create({
 				amount: serv.amount,
-				reservation,
 				service,
 			});
 			allReservationsServices.push(reservationService);
 			await reservationServicesRepository.save(reservationService);
 		}
 	}
-	console.log("33333");
 
 	// const allReservationsServices = await Promise.all<any>(
 	// 	services?.map(async (serv) => {
@@ -71,7 +67,6 @@ export const ReservationCreateService = async ({
 	// 		return reservationService;
 	// 	})
 	// );
-	console.log(allReservationsServices, "asdassda");
 
 	const reservationPetRepository = AppDataSource.getRepository(ReservationPet);
 
@@ -80,22 +75,44 @@ export const ReservationCreateService = async ({
 
 	const roomRepository = AppDataSource.getRepository(Room);
 	const allRooms = await roomRepository.find();
+	let allReservationPets: ReservationPet[] = [];
+	for (let i = 0; i < (pet_rooms?.length || 0); i++) {
+		const petRoom = pet_rooms[i];
 
-	const allReservationPets = pet_rooms?.map((petRoom) => {
 		const petChoose = allPets.find((pet) => pet.id === petRoom.pet_id);
-		const roomChoose = allRooms.filter(
-			(room) => room.room_type.id === petRoom.room_type_id
-		);
-
+		console.log(allRooms);
+		// const roomChoose = allRooms.filter(
+		// 	(room) => room.room_type.id === petRoom.room_type_id
+		// );
+		// console.log(roomChoose);
 		// aplicar uma lógica pra saber se o quarto está disponível ou não.
 		const reservationPet = reservationPetRepository.create({
 			pet: petChoose,
-			room: roomChoose[0],
-			reservation: reservation,
+			room: allRooms[0],
 		});
-		reservationPetRepository.save(reservationPet);
-		return reservationPet;
-	});
+		console.log(reservationPet);
+
+		await reservationPetRepository.save(reservationPet);
+		console.log(reservationPet, "asdsaddsa");
+		allReservationPets.push(reservationPet);
+	}
+
+	// const allReservationPets = pet_rooms?.map((petRoom) => {
+	// 	const petChoose = allPets.find((pet) => pet.id === petRoom.pet_id);
+	// 	const roomChoose = allRooms.filter(
+	// 		(room) => room.room_type.id === petRoom.room_type_id
+	// 	);
+	// 	console.log(petChoose);
+	// 	console.log(roomChoose);
+
+	// 	// aplicar uma lógica pra saber se o quarto está disponível ou não.
+	// 	const reservationPet = reservationPetRepository.create({
+	// 		pet: petChoose,
+	// 		room: roomChoose[0],
+	// 	});
+	// 	reservationPetRepository.save(reservationPet);
+	// 	return reservationPet;
+	// });
 
 	reservation.reservation_services = allReservationsServices!;
 	reservation.reservation_pets = allReservationPets!;
