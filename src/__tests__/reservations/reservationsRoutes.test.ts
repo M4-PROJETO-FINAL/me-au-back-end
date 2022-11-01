@@ -1,4 +1,4 @@
-import { mockedAdminLogin, mockedReservation, mockedReservationCat, mockedReservationDog, mockedUserLogin } from "../mocks/index";
+import { mockedAdminLogin, mockedReservation, mockedReservationCat, mockedReservationDatePassed, mockedReservationDog, mockedReservationInvalidDate, mockedUserLogin } from "../mocks/index";
 //
 import { DataSource } from "typeorm";
 import request from "supertest";
@@ -6,6 +6,7 @@ import { mockedAdmin, mockedUser } from "../mocks";
 import AppDataSource from "../../data-source";
 import app from "../../app";
 import { IReservationRequest } from "../../interfaces/reservations";
+import { IRoomType } from "../../interfaces/rooms";
 
 describe("/users", () => {
 	let connection: DataSource;
@@ -46,39 +47,93 @@ describe("/users", () => {
 
     test("POST /reservation -  Should not be able to create a reservation on the date of a room that has already been booked",async () => {
         const loginResponse = await request(app).post("/login").send(mockedUserLogin);
-		const response = await request(app).post("/reservation").set("Authorization", `Bearer ${loginResponse.body.token}`).send(mockedReservation);
+        const typeRoom = await request(app).get("/room")
+        const dates = await request(app).get(`/room/dates/${typeRoom.body[0].id}`)
+        const services = await request(app).get("/services")
+
+        mockedReservationInvalidDate.checkin = dates.body[0]
+        mockedReservationInvalidDate.services[0] = services.body[0].id
+
+		const response = await request(app).post("/reservation").set("Authorization", `Bearer ${loginResponse.body.token}`).send(mockedReservationInvalidDate);
 
         expect(response.body).toHaveProperty("message")
         expect(response.status).toBe(400)
     })
 
     test("POST /reservation -  Should not be able to book a cat room for a dog",async () => {
-        const userLoginResponse = await request(app).post("/login").send(mockedUserLogin);
-        const response = await request(app).post('/reservation').set("Authorization", `Bearer ${userLoginResponse.body.token}`).send(mockedReservationDog)
+        const loginResponse = await request(app).post("/login").send(mockedUserLogin);
+        const typeRoom = await request(app).get("/room")
+        const petId = await request(app).get("/pets").set("Authorization", `Bearer ${loginResponse.body.token}`)
+
+        mockedReservationCat.pet_rooms[0].room_type_id = typeRoom.body[1].id
+        mockedReservationCat.pet_rooms[0].pet_id = petId.body.id
+
+        const response = await request(app).post('/reservation').set("Authorization", `Bearer ${loginResponse.body.token}`).send(mockedReservationCat)
 
         expect(response.body).toHaveProperty("message")
         expect(response.status).toBe(400)
     })
 
     test("POST /reservation -  Should not be able to book a dog room for a cat",async () => {
-        const userLoginResponse = await request(app).post("/login").send(mockedUserLogin);
-        const response = await request(app).post('/reservation').set("Authorization", `Bearer ${userLoginResponse.body.token}`).send(mockedReservationCat)
+        const loginResponse = await request(app).post("/login").send(mockedUserLogin);
+        const typeRoom = await request(app).get("/room")
+        const petId = await request(app).get("/pets").set("Authorization", `Bearer ${loginResponse.body.token}`)
+
+        mockedReservationDog.pet_rooms[0].room_type_id = typeRoom.body[2].id
+        mockedReservationDog.pet_rooms[0].pet_id = petId.body.id
+
+        const response = await request(app).post('/reservation').set("Authorization", `Bearer ${loginResponse.body.token}`).send(mockedReservationDog)
 
         expect(response.body).toHaveProperty("message")
         expect(response.status).toBe(400)
     })
 
+    test("POST /reservation -  Should not be able to book a reservation to a date that already has been passed",async () => {
+        const loginResponse = await request(app).post("/login").send(mockedUserLogin);
 
-//     test("POST /reservation -  Should not be able to book a reservation to a date that already has been passed",async () => {
-//         const adminLoginResponse = await request(app).post("/login").send(mockedAdminLogin);
-//         const users = await request(app).get('/users').set("Authorization", `Bearer ${adminLoginResponse.body.token}`)
-//         const properties = await request(app).get('/properties')
-//         mockedSchedule.propertyId = properties.body[0].id
-//         mockedSchedule.userId = users.body[1].id
-//         const response = await request(app).post('/schedules').send(mockedSchedule)
+        const response = await request(app).post('/reservation').set("Authorization", `Bearer ${loginResponse.body.token}`).send(mockedReservationDatePassed)
 
-//         expect(response.body).toHaveProperty("message")
-//         expect(response.status).toBe(401)
-//     })
-// 
+        expect(response.body).toHaveProperty("message")
+        expect(response.status).toBe(400)
+    })
+
+    test("GET /reservations - Must be able to list all reservations of the application if is admin", async () => {
+        const adminLoginResponse = await request(app).post("/login").send(mockedAdminLogin);
+        const response = await request(app).get("/reservations").set("Authorization", `Bearer ${adminLoginResponse.body.token}`);
+    
+        expect(response.body).toHaveProperty("id")
+        expect(response.body).toHaveProperty("checkin")
+        expect(response.body).toHaveProperty("checkout")
+        expect(response.body).toHaveProperty("schedules")
+        expect(response.body.pet_rooms[0]).toHaveProperty("pet_id")
+        expect(response.body.pet_rooms[0]).toHaveProperty("room_type_id")
+        expect(response.body.services[0]).toHaveProperty("service_id")
+        expect(response.body.services[0]).toHaveProperty("amount")
+        expect(response.body).toHaveLength(1)
+        expect(response.status).toBe(200);
+      });
+
+    test("GET /reservations - Must be able to list all reservations of the user", async () => {
+        const loginResponse = await request(app).post("/login").send(mockedUserLogin);
+        const response = await request(app).get("/reservations").set("Authorization", `Bearer ${loginResponse.body.token}`);
+    
+        expect(response.body).toHaveProperty("id")
+        expect(response.body).toHaveProperty("checkin")
+        expect(response.body).toHaveProperty("checkout")
+        expect(response.body).toHaveProperty("schedules")
+        expect(response.body.pet_rooms[0]).toHaveProperty("pet_id")
+        expect(response.body.pet_rooms[0]).toHaveProperty("room_type_id")
+        expect(response.body.services[0]).toHaveProperty("service_id")
+        expect(response.body.services[0]).toHaveProperty("amount")
+        expect(response.body).toHaveLength(1)
+        expect(response.status).toBe(200);
+      });
+
+    test("GET /reservations - Should not be able to list reservations without authentication", async () => {
+        const response = await request(app).get("/reservations");
+    
+        expect(response.body).toHaveProperty("message")
+        expect(response.status).toBe(401)
+      });
+
 })

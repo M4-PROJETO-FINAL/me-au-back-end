@@ -85,13 +85,30 @@ export const mockedReservation: IReservationRequest = {
   checkout: "2022-08-23",
   pet_rooms: [
       {
-          pet_id: "",
+          pet_id: "1234",
           room_type_id: ""        
       }
   ],
   services: [
       {
-          id: "2fda0d8b-b847-4d38-8ce9-2c5b6b86f475",
+          id: "",
+          amount: 2
+      }
+  ]
+}
+
+export const mockedReservationInvalidDate: IReservationRequest = {
+  checkin: "",
+  checkout: "2022-08-23",
+  pet_rooms: [
+      {
+          pet_id: "1234",
+          room_type_id: ""        
+      }
+  ],
+  services: [
+      {
+          id: "",
           amount: 2
       }
   ]
@@ -103,29 +120,45 @@ export const mockedReservationDog: IReservationRequest = {
   pet_rooms: [
       {
           pet_id: "",
-          room_type_id: "ad5154de-0fd5-4798-9133-e408c887ce99"        
+          room_type_id: ""        
       }
   ],
   services: [
       {
-          id: "2fda0d8b-b847-4d38-8ce9-2c5b6b86f475",
+          id: "",
           amount: 2
       }
   ]
 }
 
 export const mockedReservationCat: IReservationRequest = {
-  checkin: "2022-08-20",
+  checkin: "2022-08-21",
   checkout: "2022-08-23",
   pet_rooms: [
       {
           pet_id: "",
-          room_type_id: "1f632692-d764-4365-bcc4-b6b90124759f"        
+          room_type_id: ""        
       }
   ],
   services: [
       {
-          id: "2fda0d8b-b847-4d38-8ce9-2c5b6b86f475",
+          id: "",
+          amount: 2
+      }
+  ]
+}
+export const mockedReservationDatePassed: IReservationRequest = {
+  checkin: "2019-08-20",
+  checkout: "2019-08-23",
+  pet_rooms: [
+      {
+          pet_id: "",
+          room_type_id: ""        
+      }
+  ],
+  services: [
+      {
+          id: "",
           amount: 2
       }
   ]
