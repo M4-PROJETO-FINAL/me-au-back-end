@@ -1,4 +1,5 @@
 import { IEditPet, IPetRequest } from '../../interfaces/pets/index';
+import { IReservationRequest } from "../../interfaces/reservations";
 import { IReviewRequest } from '../../interfaces/reviews/index';
 import { IUserLogin, IUserRequest } from '../../interfaces/users/index';
 
@@ -78,3 +79,87 @@ export const mockedEditPet: IEditPet = {
 	neutered: true,
 	vaccinated: true,
 };
+
+export const mockedReservation: IReservationRequest = {
+  checkin: "2022-08-20",
+  checkout: "2022-08-23",
+  pet_rooms: [
+      {
+          pet_id: "1234",
+          room_type_id: ""        
+      }
+  ],
+  services: [
+      {
+          id: "",
+          amount: 2
+      }
+  ]
+}
+
+export const mockedReservationInvalidDate: IReservationRequest = {
+  checkin: "",
+  checkout: "2022-08-23",
+  pet_rooms: [
+      {
+          pet_id: "1234",
+          room_type_id: ""        
+      }
+  ],
+  services: [
+      {
+          id: "",
+          amount: 2
+      }
+  ]
+}
+
+export const mockedReservationDog: IReservationRequest = {
+  checkin: "2022-08-20",
+  checkout: "2022-08-23",
+  pet_rooms: [
+      {
+          pet_id: "",
+          room_type_id: ""        
+      }
+  ],
+  services: [
+      {
+          id: "",
+          amount: 2
+      }
+  ]
+}
+
+export const mockedReservationCat: IReservationRequest = {
+  checkin: "2022-08-21",
+  checkout: "2022-08-23",
+  pet_rooms: [
+      {
+          pet_id: "",
+          room_type_id: ""        
+      }
+  ],
+  services: [
+      {
+          id: "",
+          amount: 2
+      }
+  ]
+}
+export const mockedReservationDatePassed: IReservationRequest = {
+  checkin: "2019-08-20",
+  checkout: "2019-08-23",
+  pet_rooms: [
+      {
+          pet_id: "",
+          room_type_id: ""        
+      }
+  ],
+  services: [
+      {
+          id: "",
+          amount: 2
+      }
+  ]
+}
