@@ -5,7 +5,7 @@ export interface IReservationRequest {
 	checkin: string;
 	checkout: string;
 	services?: IService[];
-	pet_rooms: IRoom[];
+	pet_rooms: IPetRoom[];
 }
 
 export interface IReservation extends IReservationRequest {
