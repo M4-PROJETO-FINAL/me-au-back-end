@@ -4,18 +4,18 @@ import { Service } from "./service.entity";
 
 @Entity("reservation_services")
 export class ReservationService {
-	@PrimaryGeneratedColumn("uuid")
-	id: string;
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
-	@Column()
-	amount: number;
+  @Column()
+  amount: number;
 
-	@ManyToOne(
-		() => Reservation,
-		(reservation) => reservation.reservation_services
-	)
-	reservation: Reservation;
+  @ManyToOne(
+    () => Reservation,
+    (reservation) => reservation.reservation_services
+  )
+  reservation: Reservation;
 
-	@ManyToOne(() => Service, (service) => service.reservation_services)
-	service: Service;
+  @ManyToOne(() => Service, (service) => service.reservation_services)
+  service: Service;
 }

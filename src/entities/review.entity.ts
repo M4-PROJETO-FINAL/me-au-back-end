@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToOne } from "typeorm";
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToOne,
+  ManyToOne,
+} from "typeorm";
+import { Reservation } from "./reservation.entity";
 import { User } from "./user.entity";
 
 @Entity("reviews")
@@ -12,6 +19,13 @@ export class Review {
   @Column()
   stars: number;
 
-  @OneToOne(() => User)
+  @OneToOne(() => Reservation, {
+    nullable: true,
+  })
+  reservation: Reservation;
+
+  @ManyToOne(() => User, (user) => user.reviews, {
+    nullable: true,
+  })
   user: User;
 }

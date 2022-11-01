@@ -3,11 +3,14 @@ import { validateReviewCreate } from "../middlewares/validateReviewCreate.middle
 import { Router } from "express";
 import reviewCreateController from "../controllers/reviews/reviewCreate.controller";
 import reviewGetController from "../controllers/reviews/reviewGet.controller";
+import reviewEditController from "../controllers/reviews/reviewUpdate.controller";
+import reviewDeleteController from "../controllers/reviews/reviewDelete.controller";
 
-const routes = Router();
+const reviewRoutes = Router();
 
-routes.post("/reviews", authUser, validateReviewCreate, reviewCreateController);
+reviewRoutes.post("", authUser, validateReviewCreate, reviewCreateController);
+reviewRoutes.get("", reviewGetController);
+reviewRoutes.delete("/:id", authUser, reviewDeleteController);
+reviewRoutes.patch("/:id", authUser, reviewEditController);
 
-routes.get("/reviews", reviewGetController);
-
-export default routes;
+export default reviewRoutes;

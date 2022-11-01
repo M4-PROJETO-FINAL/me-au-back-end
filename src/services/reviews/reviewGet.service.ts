@@ -5,9 +5,15 @@ import { IReview } from "../../interfaces/reviews";
 const reviewGetService = async () => {
   const reviewRepository = AppDataSource.getRepository(Review);
 
-  let reviews: IReview[];
+  // Falta voltar aqui para pegar a tipagem!
+  // let reviews: IReview[];
+  let reviews: any;
 
-  reviews = await reviewRepository.find();
+  reviews = await reviewRepository.find({
+    relations: {
+      user: true,
+    },
+  });
 
   return reviews;
 };
