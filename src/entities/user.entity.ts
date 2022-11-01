@@ -35,11 +35,14 @@ export class User {
   @Column({ nullable: true })
   profile_img: string;
 
-  @OneToOne(() => Review)
-  @JoinColumn()
-  review: Review;
+  @OneToMany(() => Review, (review) => review.user, {
+    nullable: true,
+  })
+  reviews: Review[];
 
-  @OneToMany(() => Pet, (pet) => pet.user)
+  @OneToMany(() => Pet, (pet) => pet.user, {
+    nullable: true,
+  })
   pets: Pet[];
 
   @OneToMany(() => Reservation, (reservation) => reservation.user)

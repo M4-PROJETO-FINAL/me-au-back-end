@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(userRoutes);
 app.use("/pets", petsRoutes);
 app.use("/rooms", roomsRoutes);
-app.use(reviewRoutes);
+app.use("/reviews", reviewRoutes);
 app.use(serviceRoutes);
 app.use("/reservations", reservationRoutes);
 app.use(handleErrorMiddleware);

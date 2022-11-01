@@ -31,7 +31,9 @@ export class Pet {
   @Column()
   docile: boolean;
 
-  @ManyToOne(() => User, (user) => user.pets)
+  @ManyToOne(() => User, (user) => user.pets, {
+    nullable: true,
+  })
   user: User;
 
   @OneToMany(() => ReservationPet, (reservation_pet) => reservation_pet.pet)

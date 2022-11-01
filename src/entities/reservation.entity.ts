@@ -1,48 +1,57 @@
 import {
-	Entity,
-	Column,
-	PrimaryGeneratedColumn,
-	OneToMany,
-	ManyToOne,
-	CreateDateColumn,
-	UpdateDateColumn,
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from "typeorm";
 import { ReservationPet } from "./reservationPet.entity";
 import { ReservationService } from "./reservationService.entity";
+import { Review } from "./review.entity";
 import { User } from "./user.entity";
 
 @Entity("reservations")
 export class Reservation {
-	@PrimaryGeneratedColumn("uuid")
-	id: string;
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
 
-	@Column()
-	checkin: Date;
+  @Column()
+  checkin: Date;
 
-	@Column()
-	checkout: Date;
+  @Column()
+  checkout: Date;
 
-	@Column({ default: "reserved" })
-	status: "reserved" | "active" | "concluded" | "cancelled";
+  @Column({ default: "reserved" })
+  status: "reserved" | "active" | "concluded" | "cancelled";
 
-	@CreateDateColumn()
-	created_at: Date;
+  @CreateDateColumn()
+  created_at: Date;
 
-	@UpdateDateColumn()
-	updated_at: Date;
+  @UpdateDateColumn()
+  updated_at: Date;
 
-	@ManyToOne(() => User, (user) => user.reservations)
-	user: User;
+  @OneToOne(() => Review, {
+    nullable: true,
+  })
+  @JoinColumn()
+  review: Review;
 
-	@OneToMany(
-		() => ReservationPet,
-		(reservation_pet) => reservation_pet.reservation
-	)
-	reservation_pets: ReservationPet[];
+  @ManyToOne(() => User, (user) => user.reservations)
+  user: User;
 
-	@OneToMany(
-		() => ReservationService,
-		(reservation_service) => reservation_service.reservation
-	)
-	reservation_services: ReservationService[];
+  @OneToMany(
+    () => ReservationPet,
+    (reservation_pet) => reservation_pet.reservation
+  )
+  reservation_pets: ReservationPet[];
+
+  @OneToMany(
+    () => ReservationService,
+    (reservation_service) => reservation_service.reservation
+  )
+  reservation_services: ReservationService[];
 }
