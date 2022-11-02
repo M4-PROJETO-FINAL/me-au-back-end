@@ -47,4 +47,12 @@ export class User {
 
   @OneToMany(() => Reservation, (reservation) => reservation.user)
   reservations: Reservation[];
+
+  @Column({ default: null })
+  @Exclude()
+  reset_password_token: string;
+
+  @Column({ default: null })
+  @Exclude()
+  reset_password_expires: Date;
 }
