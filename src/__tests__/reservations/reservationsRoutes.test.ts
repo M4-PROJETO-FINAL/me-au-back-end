@@ -168,7 +168,7 @@ describe('/users', () => {
 		expect(response.body).toHaveProperty('message');
 		expect(response.status).toBe(401);
 	});
-
+	//NAO TERMINADA
 	test('DELETE /reservations/:id - Must be able to cancel the reservation', async () => {
 		await request(app).post('/users').send(mockedUser);
 
