@@ -10,6 +10,10 @@ import { Reservation } from "../../../entities/reservation.entity";
 export const getMinAndMaxDates = (
   reservationArray: Reservation[]
 ): [Date, Date] => {
+  if (reservationArray.length === 0) {
+    const now = new Date();
+    return [now, now];
+  }
   let minCheckin = reservationArray[0].checkin;
   let maxCheckout = reservationArray[0].checkout;
   for (let i = 1; i < reservationArray.length; i++) {
@@ -35,11 +39,14 @@ export const getMinAndMaxDates = (
  * // (except that dates are actually Date objects instead of strings)
  */
 export const getDatesInRange = (minDate: Date, maxDate: Date): Date[] => {
-  const dates: Date[] = [minDate];
+  const dates: Date[] = [];
   let currDate = minDate;
-  while (currDate.getTime() < maxDate.getTime()) {
+
+  // change <= to < to exclude checkout date
+  while (currDate.getTime() <= maxDate.getTime()) {
+    let newDate = new Date(currDate.getTime());
+    dates.push(newDate);
     currDate.setDate(currDate.getDate() + 1);
-    dates.push(currDate);
   }
 
   return dates;

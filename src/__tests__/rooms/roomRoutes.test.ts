@@ -8,7 +8,7 @@ import {
   mockedUser,
   mockedUserLogin,
 } from "../mocks";
-import { v4 as uuidv4 } from "uuid";
+import { insertRooms, insertRoomTypes } from "../insertQuerys";
 
 describe("/rooms", () => {
   let connection: DataSource;
@@ -21,26 +21,8 @@ describe("/rooms", () => {
       .catch((err) => {
         console.error("Error during Data Source initialization", err);
       });
-    const queryRunner = AppDataSource.createQueryRunner();
-    await queryRunner.manager.query(
-      `INSERT INTO "room_types" ("id", "title", "description", "image", "capacity", "price") VALUES ('${uuidv4()}', 'Quarto Compartilhado', 'Ótimo custo benefício, essa opção é ideal para você que deseja que o seu pet interaja com outros catioros!', 'https://storage.googleapis.com/cmsapi.sistema.cim.br/C-307MMTG2XWCYRO/2021-05/ZFS0iTHLKOmnOZCa3eB2FlX0/html_content.jpeg?v=20220627161024', 20, 120), ('${uuidv4()}', 'Quarto Privativo (cães)', 'Busca conforto e privacidade para o seu cãozinho? O quarto privativo é a opção ideal!', 'https://static.wixstatic.com/media/3c9e04_9e67eefb471c48b483a4aba70236fb3e~mv2_d_5175_3450_s_4_2.jpg/v1/fill/w_587,h_444,q_85,usm_0.66_1.00_0.01/3c9e04_9e67eefb471c48b483a4aba70236fb3e~mv2_d_5175_3450_s_4_2.jpg', 2, 250), ('${uuidv4()}', 'Quarto Privativo (gatos)', 'Quarto privativo de alto padrão para o seu felino aproveitar com classe!', 'https://static.wixstatic.com/media/3c9e04_e6167e6e41a8456584250793ba200198~mv2_d_5093_3395_s_4_2.jpg/v1/fill/w_587,h_444,q_85,usm_0.66_1.00_0.01/3c9e04_e6167e6e41a8456584250793ba200198~mv2_d_5093_3395_s_4_2.jpg', 2, 250 )`
-    );
-
-    await queryRunner.query(
-      `INSERT INTO "rooms" ("id", "roomTypeId") SELECT '${uuidv4()}', "id" FROM "room_types" WHERE "title" = 'Quarto Compartilhado'`
-    );
-
-    for (let i = 0; i < 4; i++) {
-      await queryRunner.query(
-        `INSERT INTO "rooms" ("id", "roomTypeId") SELECT '${uuidv4()}', "id" FROM "room_types" WHERE "title" = 'Quarto Privativo (cães)'`
-      );
-    }
-
-    for (let i = 0; i < 4; i++) {
-      await queryRunner.query(
-        `INSERT INTO "rooms" ("id", "roomTypeId") SELECT '${uuidv4()}', "id" FROM "room_types" WHERE "title" = 'Quarto Privativo (gatos)'`
-      );
-    }
+    await insertRoomTypes(AppDataSource);
+    await insertRooms(AppDataSource);
 
     await request(app).post("/users").send(mockedUser);
     await request(app).post("/users").send(mockedAdmin);

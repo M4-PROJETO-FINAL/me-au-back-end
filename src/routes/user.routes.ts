@@ -15,6 +15,9 @@ import {
 	validateUserUpdate,
 } from '../middlewares/validateUserUpdate';
 import userDeleteController from '../controllers/users/userDelete.controller';
+import UserForgotPasswordController from '../controllers/users/userForgotPassword.controller';
+import UserVerifyPwController from '../controllers/users/userVerifyPw.controller';
+import UserResetPasswordController from '../controllers/users/userResetPassword.controller';
 
 const routes = Router();
 
@@ -39,5 +42,8 @@ routes.delete(
 	validateIsAdm,
 	userDeleteController
 );
+routes.patch('/forgot', UserForgotPasswordController)
+routes.post('/forgot/verify', UserVerifyPwController)
+routes.patch('/forgot/:code', UserResetPasswordController)
 
 export default routes;
