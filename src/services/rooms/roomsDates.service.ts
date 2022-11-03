@@ -3,7 +3,13 @@ import { Reservation } from "../../entities/reservation.entity";
 import { RoomType } from "../../entities/roomType.entity";
 import { AppError } from "../../errors/appError";
 
-export const getMinAndMaxDates = (reservationArray: Reservation[]) => {
+export const getMinAndMaxDates = (
+  reservationArray: Reservation[]
+): [Date, Date] => {
+  if (reservationArray.length === 0) {
+    const now = new Date();
+    return [now, now];
+  }
   let minCheckin = reservationArray[0].checkin;
   let maxCheckout = reservationArray[0].checkout;
   for (let i = 1; i < reservationArray.length; i++) {
@@ -19,13 +25,11 @@ export const getMinAndMaxDates = (reservationArray: Reservation[]) => {
 };
 
 export const getDatesInRange = (minDate: Date, maxDate: Date): Date[] => {
-  const dates: Date[] = [minDate];
+  const dates: Date[] = [];
   let currDate = minDate;
   while (currDate.getTime() < maxDate.getTime()) {
-    // adiciona um dia
-    currDate.setDate(currDate.getDate() + 1);
-
     dates.push(currDate);
+    currDate.setDate(currDate.getDate() + 1);
   }
 
   return dates;
@@ -84,6 +88,7 @@ export const existsAvailableRoom = async (
   date: Date,
   roomTypeId: string
 ): Promise<boolean> => {
+  const privateRoomsAmount = 4;
   const reservationsOfSameRoomType = await getAllReservationsOfAGivenRoomType(
     roomTypeId
   );
@@ -96,7 +101,7 @@ export const existsAvailableRoom = async (
         resCheckin <= date.getTime() && resCheckout > date.getTime();
       return resIncludesDate;
     });
-  return reservationsOfSameRoomTypeThatContainDate.length < 4;
+  return reservationsOfSameRoomTypeThatContainDate.length < privateRoomsAmount;
 };
 
 const roomsDatesService = async (room_type_id: string) => {
