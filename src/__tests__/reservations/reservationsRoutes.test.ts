@@ -8,20 +8,20 @@ import {
 	mockedReservationDog,
 	mockedReservationInvalidDate,
 	mockedUserLogin,
-} from '../mocks/index';
-import { DataSource } from 'typeorm';
-import request from 'supertest';
-import { mockedAdmin, mockedUser } from '../mocks';
-import AppDataSource from '../../data-source';
-import app from '../../app';
-import { IReservationRequest } from '../../interfaces/reservations';
-import { IRoomType } from '../../interfaces/rooms';
-import { RoomType } from '../../entities/roomType.entity';
-import { Service } from '../../entities/service.entity';
-import { Pet } from '../../entities/pet.entity';
-import { insertRooms, insertRoomTypes, insertServices } from '../insertQuerys';
+} from "../mocks/index";
+import { DataSource } from "typeorm";
+import request from "supertest";
+import { mockedAdmin, mockedUser } from "../mocks";
+import AppDataSource from "../../data-source";
+import app from "../../app";
+import { IReservationRequest } from "../../interfaces/reservations";
+import { IRoomType } from "../../interfaces/rooms";
+import { RoomType } from "../../entities/roomType.entity";
+import { Service } from "../../entities/service.entity";
+import { Pet } from "../../entities/pet.entity";
+import { insertRooms, insertRoomTypes, insertServices } from "../insertQuerys";
 
-describe('/users', () => {
+describe("/users", () => {
 	let connection: DataSource;
 	let reservation: IReservationRequest;
 	let typeRoom: RoomType[];
@@ -35,38 +35,42 @@ describe('/users', () => {
 				connection = res;
 			})
 			.catch((err) => {
-				console.error('Error during Data Source initialization', err);
+				console.error("Error during Data Source initialization", err);
 			});
 		await insertRoomTypes(AppDataSource);
 		await insertRooms(AppDataSource);
 		await insertServices(AppDataSource);
 
-		await request(app).post('/users').send(mockedUser);
-		await request(app).post('/users').send(mockedAdmin);
+		await request(app).post("/users").send(mockedUser);
+		await request(app).post("/users").send(mockedAdmin);
 
-		const loginResponse = await request(app).post('/login').send(mockedUserLogin);
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
 		createdCat = (
 			await request(app)
-				.post('/pets')
+				.post("/pets")
 				.send(mockedCat)
-				.set('Authorization', `Bearer ${loginResponse.body.token}`)
+				.set("Authorization", `Bearer ${loginResponse.body.token}`)
 		).body;
 		createdDog = (
 			await request(app)
-				.post('/pets')
+				.post("/pets")
 				.send(mockedDog)
-				.set('Authorization', `Bearer ${loginResponse.body.token}`)
+				.set("Authorization", `Bearer ${loginResponse.body.token}`)
 		).body;
-		typeRoom = (await request(app).get('/rooms/types')).body;
-		services = (await request(app).get('/services')).body;
+		typeRoom = (await request(app).get("/rooms/types")).body;
+		services = (await request(app).get("/services")).body;
 	});
 
 	afterAll(async () => {
 		await connection.destroy();
 	});
 
-	test('POST /reservations -  Must be able to create a reservation', async () => {
-		const loginResponse = await request(app).post('/login').send(mockedUserLogin);
+	test("POST /reservations -  Must be able to create a reservation", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
 
 		const mockRes = { ...mockedReservation };
 		mockRes.pet_rooms = [
@@ -83,28 +87,81 @@ describe('/users', () => {
 		];
 
 		const response = await request(app)
-			.post('/reservations')
-			.set('Authorization', `Bearer ${loginResponse.body.token}`)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
 			.send(mockRes);
 
 		reservation = response.body;
 
-		console.log(response.body);
-
-		expect(response.body).toHaveProperty('id');
-		expect(response.body.status).toBe('reserved');
-		expect(response.body).toHaveProperty('checkin');
+		expect(response.body).toHaveProperty("id");
+		expect(response.body.status).toBe("reserved");
+		expect(response.body).toHaveProperty("checkin");
 		expect(response.body.checkin.slice(0, 10)).toEqual(mockRes.checkin);
-		expect(response.body).toHaveProperty('checkout');
+		expect(response.body).toHaveProperty("checkout");
 		expect(response.body.checkout.slice(0, 10)).toEqual(mockRes.checkout);
-		expect(response.body).toHaveProperty('services');
-		expect(response.body).toHaveProperty('pet_rooms');
+		expect(response.body).toHaveProperty("services");
+		expect(response.body).toHaveProperty("pet_rooms");
 
 		expect(response.status).toBe(201);
 	});
 
-	test('POST /reservations -  Should not be able to create a reservation on the date of a room that has already been booked', async () => {
-		const loginResponse = await request(app).post('/login').send(mockedUserLogin);
+	test("POST /reservations -  Must be able to create a reservation at the actual day", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
+
+		const mockRes = { ...mockedReservation };
+		mockRes.pet_rooms = [
+			{
+				pet_id: createdDog.id,
+				room_type_id: typeRoom[0].id,
+			},
+		];
+		mockRes.services = [
+			{
+				service_id: services[3].id,
+				amount: 2,
+			},
+		];
+		const checkinDate = new Date();
+		let checkinDay = (checkinDate.getDay() + 1).toString();
+		let checkinMonth = (checkinDate.getMonth() + 1).toString();
+		const checkinYear = checkinDate.getFullYear();
+
+		if (+checkinDay < 10) {
+			checkinDay = "0" + checkinDay;
+		}
+		if (+checkinMonth < 10) {
+			checkinMonth = "0" + checkinMonth;
+		}
+
+		const checkin = `${checkinYear}-${checkinMonth}-${checkinDay}`;
+		console.log(checkin);
+		mockRes.checkin = checkin;
+
+		const response = await request(app)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
+			.send(mockRes);
+
+		reservation = response.body;
+
+		expect(response.body).toHaveProperty("id");
+		expect(response.body.status).toBe("reserved");
+		expect(response.body).toHaveProperty("checkin");
+		expect(response.body.checkin.slice(0, 10)).toEqual(mockRes.checkin);
+		expect(response.body).toHaveProperty("checkout");
+		expect(response.body.checkout.slice(0, 10)).toEqual(mockRes.checkout);
+		expect(response.body).toHaveProperty("services");
+		expect(response.body).toHaveProperty("pet_rooms");
+
+		expect(response.status).toBe(201);
+	});
+
+	test("POST /reservations -  Should not be able to create a reservation on the date of a room that has already been booked", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
 
 		// garantir que a requisição abaixo retorne pelo menos uma data:
 		const dates = await request(app).get(`/room/dates/${typeRoom[0].id}`);
@@ -114,66 +171,319 @@ describe('/users', () => {
 		mockedReservationInvalidDate.services![0].amount = 1;
 
 		const response = await request(app)
-			.post('/reservations')
-			.set('Authorization', `Bearer ${loginResponse.body.token}`)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
 			.send(mockedReservationInvalidDate);
 
-		expect(response.body).toHaveProperty('message');
+		expect(response.body).toHaveProperty("message");
 		expect(response.status).toBe(400);
 	});
 
-	test('POST /reservations -  Should not be able to book a cat room for a dog', async () => {
-		const loginResponse = await request(app).post('/login').send(mockedUserLogin);
+	test("POST /reservations - Should not be able to create a reservation  on a invalid checkin date format", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
+
+		const mockRes = { ...mockedReservation };
+		mockRes.pet_rooms = [
+			{
+				pet_id: createdDog.id,
+				room_type_id: typeRoom[0].id,
+			},
+		];
+		mockRes.services = [
+			{
+				service_id: services[3].id,
+				amount: 2,
+			},
+		];
+
+		mockRes.checkin = "22-10-2025";
+
+		const response = await request(app)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
+			.send(mockRes);
+
+		reservation = response.body;
+
+		expect(response.status).toBe(400);
+		expect(response.body).toHaveProperty("message");
+		expect(response.body.message).toBe(
+			"Invalid date format. Should be YYYY-MM-DD."
+		);
+	});
+
+	test("POST /reservations - Should not be able to create a reservation on a date that does not exist", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
+
+		const mockRes = { ...mockedReservation };
+		mockRes.pet_rooms = [
+			{
+				pet_id: createdDog.id,
+				room_type_id: typeRoom[0].id,
+			},
+		];
+		mockRes.services = [
+			{
+				service_id: services[3].id,
+				amount: 2,
+			},
+		];
+
+		mockRes.checkin = "2025-30-15";
+
+		const response = await request(app)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
+			.send(mockRes);
+
+		reservation = response.body;
+
+		expect(response.status).toBe(400);
+		expect(response.body).toHaveProperty("message");
+		expect(response.body.message).toBe(
+			"Invalid date. This date does not exist."
+		);
+	});
+
+	test("POST /reservations - Should not be able to create a reservation if the checkin date is after the checkout date", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
+
+		const mockRes = { ...mockedReservation };
+		mockRes.pet_rooms = [
+			{
+				pet_id: createdDog.id,
+				room_type_id: typeRoom[0].id,
+			},
+		];
+		mockRes.services = [
+			{
+				service_id: services[3].id,
+				amount: 2,
+			},
+		];
+
+		mockRes.checkin = "2025-10-15";
+		mockRes.checkout = "2025-10-10";
+
+		const response = await request(app)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
+			.send(mockRes);
+
+		reservation = response.body;
+
+		expect(response.status).toBe(400);
+		expect(response.body).toHaveProperty("message");
+		expect(response.body.message).toBe(
+			"Invalid checkin date. Checkout date should be after checkin date."
+		);
+	});
+
+	test("POST /reservations - Should not be able to create a reservation if the checkin date is equal to the checkout date", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
+
+		const mockRes = { ...mockedReservation };
+		mockRes.pet_rooms = [
+			{
+				pet_id: createdDog.id,
+				room_type_id: typeRoom[0].id,
+			},
+		];
+		mockRes.services = [
+			{
+				service_id: services[3].id,
+				amount: 2,
+			},
+		];
+
+		mockRes.checkin = "2025-10-10";
+		mockRes.checkout = "2025-10-10";
+
+		const response = await request(app)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
+			.send(mockRes);
+
+		reservation = response.body;
+
+		expect(response.status).toBe(400);
+		expect(response.body).toHaveProperty("message");
+		expect(response.body.message).toBe(
+			"Invalid checkin date. Checkout date should be after checkin date."
+		);
+	});
+
+	test("POST /reservations - Should not be able to create a reservation with an invalid service_id", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
+
+		const mockRes = { ...mockedReservation };
+		mockRes.pet_rooms = [
+			{
+				pet_id: createdDog.id,
+				room_type_id: typeRoom[0].id,
+			},
+		];
+		mockRes.services = [
+			{
+				service_id: "4aebdc17-0bab-4afa-814a-90927ee08c7c",
+				amount: 2,
+			},
+		];
+
+		mockRes.checkin = "2025-10-10";
+		mockRes.checkout = "2025-10-11";
+
+		const response = await request(app)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
+			.send(mockRes);
+
+		reservation = response.body;
+
+		expect(response.status).toBe(400);
+		expect(response.body).toHaveProperty("message");
+		expect(response.body.message).toBe("Invalid service_id.");
+	});
+
+	test("POST /reservations - Should not be able to create a reservation with an invalid room_type_id", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
+
+		const mockRes = { ...mockedReservation };
+		mockRes.pet_rooms = [
+			{
+				pet_id: createdDog.id,
+				room_type_id: "4aebdc17-0bab-4afa-814a-90927ee08c7c",
+			},
+		];
+		mockRes.services = [
+			{
+				service_id: services[3].id,
+				amount: 2,
+			},
+		];
+
+		mockRes.checkin = "2025-10-10";
+		mockRes.checkout = "2025-10-12";
+
+		const response = await request(app)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
+			.send(mockRes);
+
+		reservation = response.body;
+
+		expect(response.status).toBe(400);
+		expect(response.body).toHaveProperty("message");
+		expect(response.body.message).toBe("Invalid room_type_id.");
+	});
+
+	test("POST /reservations - Should not be able to create a reservation with an invalid pet_id", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
+
+		const mockRes = { ...mockedReservation };
+		mockRes.pet_rooms = [
+			{
+				pet_id: "4aebdc17-0bab-4afa-814a-90927ee08c7c",
+				room_type_id: typeRoom[0].id,
+			},
+		];
+		mockRes.services = [
+			{
+				service_id: services[3].id,
+				amount: 2,
+			},
+		];
+
+		mockRes.checkin = "2025-10-10";
+		mockRes.checkout = "2025-10-20";
+
+		const response = await request(app)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
+			.send(mockRes);
+
+		reservation = response.body;
+
+		expect(response.status).toBe(400);
+		expect(response.body).toHaveProperty("message");
+		expect(response.body.message).toBe("Invalid pet_id.");
+	});
+
+	test("POST /reservations -  Should not be able to book a cat room for a dog", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
 
 		mockedReservationCat.pet_rooms[0].room_type_id = typeRoom[1].id;
 		mockedReservationCat.pet_rooms[0].pet_id = createdCat.id;
 
 		const response = await request(app)
-			.post('/reservations')
-			.set('Authorization', `Bearer ${loginResponse.body.token}`)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
 			.send(mockedReservationCat);
 
-		expect(response.body).toHaveProperty('message');
+		expect(response.body).toHaveProperty("message");
 		expect(response.status).toBe(400);
 	});
 
-	test('POST /reservations -  Should not be able to book a dog room for a cat', async () => {
-		const loginResponse = await request(app).post('/login').send(mockedUserLogin);
+	test("POST /reservations -  Should not be able to book a dog room for a cat", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
 		const petId = await request(app)
-			.get('/pets')
-			.set('Authorization', `Bearer ${loginResponse.body.token}`);
+			.get("/pets")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`);
 
 		mockedReservationDog.pet_rooms[0].room_type_id = typeRoom[2].id;
 		mockedReservationDog.pet_rooms[0].pet_id = petId.body.id;
 
 		const response = await request(app)
-			.post('/reservations')
-			.set('Authorization', `Bearer ${loginResponse.body.token}`)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
 			.send(mockedReservationDog);
 
-		expect(response.body).toHaveProperty('message');
+		expect(response.body).toHaveProperty("message");
 		expect(response.status).toBe(400);
 	});
 
-	test('POST /reservations -  Should not be able to book a reservation to a date that already has been passed', async () => {
-		const loginResponse = await request(app).post('/login').send(mockedUserLogin);
+	test("POST /reservations -  Should not be able to book a reservation to a date that already has been passed", async () => {
+		const loginResponse = await request(app)
+			.post("/login")
+			.send(mockedUserLogin);
 
 		const response = await request(app)
-			.post('/reservations')
-			.set('Authorization', `Bearer ${loginResponse.body.token}`)
+			.post("/reservations")
+			.set("Authorization", `Bearer ${loginResponse.body.token}`)
 			.send(mockedReservationDatePassed);
 
-		expect(response.body).toHaveProperty('message');
+		expect(response.body).toHaveProperty("message");
 		expect(response.status).toBe(400);
+		expect(response.body.message).toBe(
+			"Invalid checkin date. Checkin should not be in a date that already has been passed."
+		);
 	});
 
-	test('GET /reservations - Must be able to list all reservations of the application if is admin', async () => {
+	test("GET /reservations - Must be able to list all reservations of the application if is admin", async () => {
 		const adminLoginResponse = await request(app)
-			.post('/login')
+			.post("/login")
 			.send(mockedAdminLogin);
 		const response = await request(app)
-			.get('/reservations')
-			.set('Authorization', `Bearer ${adminLoginResponse.body.token}`);
+			.get("/reservations")
+			.set("Authorization", `Bearer ${adminLoginResponse.body.token}`);
 
 		expect(response.body[0]).toHaveProperty('id');
 		expect(response.body[0]).toHaveProperty('checkin');
@@ -201,8 +511,8 @@ describe('/users', () => {
 		expect(response.status).toBe(200);
 	});
 
-	test('GET /reservations - Should not be able to list reservations without authentication', async () => {
-		const response = await request(app).get('/reservations');
+	test("GET /reservations - Should not be able to list reservations without authentication", async () => {
+		const response = await request(app).get("/reservations");
 
 		expect(response.body).toHaveProperty('message');
 		expect(response.status).toBe(401);
