@@ -32,6 +32,10 @@ export const ReservationCreateService = async (
   );
   const checkinDate = new Date(checkin);
   const checkoutDate = new Date(checkout);
+  console.log("checkin:");
+  console.log(checkinDate);
+  console.log("checkout:");
+  console.log(checkoutDate);
   reservation.checkin = checkinDate;
   reservation.checkout = checkoutDate;
 
