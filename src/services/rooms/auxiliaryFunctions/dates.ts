@@ -41,8 +41,11 @@ export const getMinAndMaxDates = (
 export const getDatesInRange = (minDate: Date, maxDate: Date): Date[] => {
   const dates: Date[] = [];
   let currDate = minDate;
-  while (currDate.getTime() < maxDate.getTime()) {
-    dates.push(currDate);
+
+  // change <= to < to exclude checkout date
+  while (currDate.getTime() <= maxDate.getTime()) {
+    let newDate = new Date(currDate.getTime());
+    dates.push(newDate);
     currDate.setDate(currDate.getDate() + 1);
   }
 
