@@ -2,20 +2,28 @@ import { Reservation } from '../../entities/reservation.entity';
 import AppDataSource from '../../data-source';
 import { AppError } from '../../errors/appError';
 
-const reservationDeleteService = async (id: string): Promise<Reservation> => {
+interface IReservationDelete {
+	id: string;
+}
+
+const reservationDeleteService = async ({ id }: IReservationDelete) => {
 	const reservationRepository = AppDataSource.getRepository(Reservation);
 
-	const reservation = await reservationRepository.findOneBy({ id });
+	const reservations = await reservationRepository.findOneBy({ id });
 
-	if (!reservation) {
-		throw new AppError('Reservation not found', 404);
+	if (!reservations) {
+		throw new AppError('Reservation does not exists', 404);
 	}
-	//more to be added
-	await reservationRepository.update(reservation!.id, {
-		status: (reservation!.status = 'cancelled'),
+
+	if (reservations.status === 'cancelled') {
+		throw new AppError('Reservation does not exists', 400);
+	}
+
+	await reservationRepository.update(reservations!.id, {
+		status: (reservations!.status = 'cancelled'),
 	});
 
-	return reservation!;
+	return reservations!;
 };
 
 export default reservationDeleteService;

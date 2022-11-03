@@ -9,8 +9,8 @@ import validateIsAdm from '../middlewares/validateIsAdm.middleware';
 const routes = Router();
 
 routes.get('', authUser, validateIsAdm, reservationGetController);
-routes.get('/:id', authUser, reservationGetOneController)
+routes.get('/:id', authUser, reservationGetOneController);
 routes.post('', authUser, reservationCreateController);
-routes.delete('/:id', authUser, reservationDeleteController);
+routes.delete('/:id', authUser, validateIsAdm, reservationDeleteController);
 
 export default routes;
