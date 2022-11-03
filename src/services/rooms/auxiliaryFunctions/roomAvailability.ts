@@ -24,7 +24,6 @@ export const getAllReservationsOfAGivenRoomType = async (
   const reservationsOfSameRoomType = allReservations.filter((reservation) => {
     const reservationRoomsTypesIds = reservation.reservation_pets.map(
       (reservationPet) => {
-        console.log(reservationPet);
         return reservationPet.room.room_type.id;
       }
     );
