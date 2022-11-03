@@ -28,15 +28,15 @@ const userForgotPasswordService = async ({ email }: IUserPasswordProps) => {
 
     await sendEmail(messageEmail)
 
-    // let expiryDate = Date.now() + 60 * 1000 * 20
+    let expiryDate = Date.now() + 60 * 1000 * 20
 
     userEmail.reset_password_token = code.toString();
-    // userEmail.reset_password_expires = expiryDate
+    userEmail.reset_password_expires = new Date(expiryDate)
 
     await userRepository.save(userEmail)
 
 
-    return code.toString()
+    return { code, expiryDate }
 };
 
 export default userForgotPasswordService;

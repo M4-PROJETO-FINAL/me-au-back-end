@@ -28,7 +28,7 @@ const userResetPasswordService = async ({ new_password, confirm_password }: IUse
 
     const user = await userRepository.findOneBy({reset_password_token: code})
 
-    return userCode
+    return user
 };
 
 export default userResetPasswordService;
