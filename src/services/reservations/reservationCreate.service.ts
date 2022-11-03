@@ -6,152 +6,112 @@ import { ReservationService } from "../../entities/reservationService.entity";
 import { ReservationPet } from "../../entities/reservationPet.entity";
 import { Service } from "../../entities/service.entity";
 import { Pet } from "../../entities/pet.entity";
-import { Room } from "../../entities/room.entity";
+import { AppError } from "../../errors/appError";
+import { IPetRoom } from "../../interfaces/rooms";
+import { IService } from "../../interfaces/services";
+import { getAvailableRoom } from "../rooms/auxiliaryFunctions/roomAvailability";
 
-interface IReservationCreate extends IReservationRequest {
-  user_id: string;
-}
-
-// ajeitar any
-export const ReservationCreateService = async ({
-  user_id,
-  checkin,
-  checkout,
-  pet_rooms,
-  services,
-}: any) => {
+export const ReservationCreateService = async (
+  user_id: string,
+  { checkin, checkout, pet_rooms, services }: IReservationRequest
+) => {
   const reservationRepository = AppDataSource.getRepository(Reservation);
-  const serviceRepository = AppDataSource.getRepository(Service);
-
-  const reservationServicesRepository =
-    AppDataSource.getRepository(ReservationService);
 
   const userRepository = AppDataSource.getRepository(User);
   const user = await userRepository.findOneBy({ id: user_id });
-  // 31/10/2022 <--> 10/11/2022
-  // [01/11/2022, 02/11/2022, 03/11/2022, 04/11/2022, 05/11/2022...] []
-  const checkinDate = new Date(checkin);
-  const checkoutDate = new Date(checkout);
+  if (!user) throw new AppError("Logged in user does not exist (impossible)");
 
   const reservation = new Reservation();
+  reservation.user = user;
+  reservation.reservation_services = await makeReservationServices(services);
+
+  reservation.reservation_pets = await makeReservationPets(
+    pet_rooms,
+    new Date(checkin),
+    new Date(checkout)
+  );
+  const checkinDate = new Date(checkin);
+  const checkoutDate = new Date(checkout);
   reservation.checkin = checkinDate;
   reservation.checkout = checkoutDate;
-  reservation.user = user!;
 
+  await reservationRepository.save(reservation);
+
+  return makeResponseObject(reservation, pet_rooms, services);
+};
+
+async function makeReservationServices(
+  services: IService[] | undefined
+): Promise<ReservationService[]> {
+  const serviceRepository = AppDataSource.getRepository(Service);
   const allServices = await serviceRepository.find();
-  console.log(allServices);
-  // [idService1, idService2, idService3, id ]
-  // [serviços faltava name, descrição] ====>
+  const reservationServicesRepository =
+    AppDataSource.getRepository(ReservationService);
 
-  let allReservationsServices: any = [];
+  const allReservationServices: ReservationService[] = [];
   if (services) {
-    for (let i = 0; i < (services?.length || 0); i++) {
+    for (let i = 0; i < services.length; i++) {
       const serv = services[i];
-      console.log(serv, "213123123321");
       const service = allServices.find(
         (service) => service.id === serv.service_id
       );
-      console.log(service, "234342234423");
       const reservationService = reservationServicesRepository.create({
         amount: serv.amount,
         service,
       });
       await reservationServicesRepository.save(reservationService);
 
-      allReservationsServices.push(reservationService);
+      allReservationServices.push(reservationService);
     }
   }
 
-  // const allReservationsServices = await Promise.all<any>(
-  // 	services?.map(async (serv) => {
-  // 		const service = allServices.find((service) => service.id === serv.id);
-  // 		const reservationService = reservationServicesRepository.create({
-  // 			amount: serv.amount,
-  // 			reservation,
-  // 			service,
-  // 		});
-  // 		await reservationServicesRepository.save(reservationService);
-  // 		return reservationService;
-  // 	})
-  // );
+  return allReservationServices;
+}
 
+async function makeReservationPets(
+  pet_rooms: IPetRoom[],
+  checkin: Date,
+  checkout: Date
+): Promise<ReservationPet[]> {
   const reservationPetRepository = AppDataSource.getRepository(ReservationPet);
 
   const petRepository = AppDataSource.getRepository(Pet);
   const allPets = await petRepository.find();
 
-  const roomRepository = AppDataSource.getRepository(Room);
-  const allRooms = await roomRepository.find({
-    relations: {
-      room_type: true,
-    },
-  });
-
-  let allReservationPets: ReservationPet[] = [];
-  for (let i = 0; i < (pet_rooms?.length || 0); i++) {
+  const allReservationPets: ReservationPet[] = [];
+  for (let i = 0; i < pet_rooms.length; i++) {
     const petRoom = pet_rooms[i];
 
-    const petChoose = allPets.find((pet) => pet.id === petRoom.pet_id);
-    console.log(allRooms);
-    // const roomChoose = allRooms.filter(
-    // 	(room) => room.room_type.id === petRoom.room_type_id
-    // );
-    // console.log(roomChoose);
-    // aplicar uma lógica pra saber se o quarto está disponível ou não.
-
+    const currentPet = allPets.find((pet) => pet.id === petRoom.pet_id);
+    const availableRoom = await getAvailableRoom(
+      checkin,
+      checkout,
+      petRoom.room_type_id
+    );
     const reservationPet = reservationPetRepository.create({
-      pet: petChoose,
-      room: allRooms[0],
+      pet: currentPet,
+      room: availableRoom,
     });
     await reservationPetRepository.save(reservationPet);
     allReservationPets.push(reservationPet);
   }
 
-  // const allReservationPets = pet_rooms?.map((petRoom) => {
-  // 	const petChoose = allPets.find((pet) => pet.id === petRoom.pet_id);
-  // 	const roomChoose = allRooms.filter(
-  // 		(room) => room.room_type.id === petRoom.room_type_id
-  // 	);
-  // 	console.log(petChoose);
-  // 	console.log(roomChoose);
+  return allReservationPets;
+}
 
-  // 	// aplicar uma lógica pra saber se o quarto está disponível ou não.
-  // 	const reservationPet = reservationPetRepository.create({
-  // 		pet: petChoose,
-  // 		room: roomChoose[0],
-  // 	});
-  // 	reservationPetRepository.save(reservationPet);
-  // 	return reservationPet;
-  // });
-
-  reservation.reservation_services = allReservationsServices!;
-  reservation.reservation_pets = allReservationPets!;
-  await reservationRepository.save(reservation);
-
-  const petRoomsReservation = reservation.reservation_pets.map((resPet) => {
-    return {
-      pet_id: resPet.pet.id,
-      room_type_id: resPet.room.room_type.id,
-    };
-  });
-  console.log(petRoomsReservation);
-  const servicesReservation = reservation.reservation_services.map((resSer) => {
-    return {
-      service_id: resSer.service.id,
-      amount: resSer.amount,
-    };
-  });
-
-  const newReservation = {
+function makeResponseObject(
+  reservation: Reservation,
+  pet_rooms: IPetRoom[],
+  services: IService[] | undefined
+) {
+  return {
     id: reservation.id,
     status: reservation.status,
     created_at: reservation.created_at,
     updated_at: reservation.updated_at,
     checkin: reservation.checkin,
     checkout: reservation.checkout,
-    pet_rooms: petRoomsReservation,
-    services: servicesReservation,
+    pet_rooms: pet_rooms,
+    services: services || [],
   };
-  // return reservation;
-  return newReservation;
-};
+}

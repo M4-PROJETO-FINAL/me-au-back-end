@@ -1,4 +1,4 @@
 export interface IService {
-	id: string;
-	amount: number;
+  service_id: string;
+  amount: number;
 }
