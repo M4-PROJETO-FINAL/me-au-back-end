@@ -21,22 +21,23 @@ export const ReservationCreateService = async (
   const user = await userRepository.findOneBy({ id: user_id });
   if (!user) throw new AppError("Logged in user does not exist (impossible)");
 
-  const checkinDate = new Date(checkin);
-  const checkoutDate = new Date(checkout);
-
   const reservation = new Reservation();
-  reservation.checkin = checkinDate;
-  reservation.checkout = checkoutDate;
   reservation.user = user;
   reservation.reservation_services = await makeReservationServices(services);
+
   reservation.reservation_pets = await makeReservationPets(
     pet_rooms,
-    checkinDate,
-    checkoutDate
+    new Date(checkin),
+    new Date(checkout)
   );
+  const checkinDate = new Date(checkin);
+  const checkoutDate = new Date(checkout);
+  reservation.checkin = checkinDate;
+  reservation.checkout = checkoutDate;
+
   await reservationRepository.save(reservation);
 
-  return makeResponseObject(reservation);
+  return makeResponseObject(reservation, pet_rooms, services);
 };
 
 async function makeReservationServices(
@@ -98,20 +99,11 @@ async function makeReservationPets(
   return allReservationPets;
 }
 
-function makeResponseObject(reservation: Reservation) {
-  const petRoomsReservation = reservation.reservation_pets.map((resPet) => {
-    return {
-      pet_id: resPet.pet.id,
-      room_type_id: resPet.room.room_type.id,
-    };
-  });
-  const servicesReservation = reservation.reservation_services.map((resSer) => {
-    return {
-      service_id: resSer.service?.id,
-      amount: resSer.amount,
-    } as IService;
-  });
-
+function makeResponseObject(
+  reservation: Reservation,
+  pet_rooms: IPetRoom[],
+  services: IService[] | undefined
+) {
   return {
     id: reservation.id,
     status: reservation.status,
@@ -119,7 +111,7 @@ function makeResponseObject(reservation: Reservation) {
     updated_at: reservation.updated_at,
     checkin: reservation.checkin,
     checkout: reservation.checkout,
-    pet_rooms: petRoomsReservation,
-    services: servicesReservation,
+    pet_rooms: pet_rooms,
+    services: services || [],
   };
 }
