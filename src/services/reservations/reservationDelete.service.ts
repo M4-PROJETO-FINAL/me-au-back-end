@@ -10,7 +10,7 @@ const reservationDeleteService = async (id: string): Promise<Reservation> => {
 	if (!reservation) {
 		throw new AppError('Reservation not found', 404);
 	}
-
+	//more to be added
 	await reservationRepository.update(reservation!.id, {
 		status: (reservation!.status = 'cancelled'),
 	});
