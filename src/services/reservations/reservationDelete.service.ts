@@ -6,9 +6,9 @@ const reservationDeleteService = async (id: string): Promise<Reservation> => {
 
 	const reservation = await reservationRepository.findOneBy({ id });
 
-	console.log(reservation);
-
-	await reservationRepository.delete(reservation!);
+	await reservationRepository.update(reservation!.id, {
+		status: (reservation!.status = 'cancelled'),
+	});
 
 	return reservation!;
 };
