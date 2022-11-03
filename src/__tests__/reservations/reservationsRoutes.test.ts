@@ -168,7 +168,7 @@ describe('/users', () => {
 		expect(response.body).toHaveProperty('message');
 		expect(response.status).toBe(401);
 	});
-	//NAO TERMINADA
+
 	test('DELETE /reservations/:id - Must be able to cancel the reservation', async () => {
 		await request(app).post('/users').send(mockedUser);
 
@@ -182,7 +182,14 @@ describe('/users', () => {
 		const response = await request(app)
 			.delete(`/reservations/${reservationTobeDeleted.body[0].id}`)
 			.set('Authorization', `Bearer ${userLoginResponse.body.token}`);
+
+		const findUser = await request(app)
+			.get('/users')
+			.set('Authorization', `Bearer ${userLoginResponse.body.token}`);
+
 		expect(response.status).toBe(204);
+
+		expect(findUser.body[0].status).toBe('cancelled');
 	});
 
 	test('DELETE /reservations/:id - Must be able to cancel the reservation of another user with adm permission', async () => {
