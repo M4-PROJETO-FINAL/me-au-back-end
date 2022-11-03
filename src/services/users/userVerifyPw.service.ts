@@ -10,7 +10,7 @@ interface IUserVerifyPwProps {
 
 const userVerifyPwService = async ({ code }: IUserVerifyPwProps) => {
 	const userRepository = AppDataSource.getRepository(User);
-    const userCode = await userRepository.findOneBy({reset_password_token: code})
+    const userCode = await userRepository.findOneBy({reset_password_token: code.toString()})
 	
     if(!userCode) {
         throw new AppError("Cannot be processed", 400)
@@ -21,7 +21,7 @@ const userVerifyPwService = async ({ code }: IUserVerifyPwProps) => {
 
     // await userRepository.save(userCode)
 
-    const user = await userRepository.findOneBy({reset_password_token: code})
+    const user = await userRepository.findOneBy({reset_password_token: code.toString()})
 
     return userCode
 };

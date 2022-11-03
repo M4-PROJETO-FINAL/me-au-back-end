@@ -50,9 +50,9 @@ export class User {
 
   @Column({ default: null })
   @Exclude()
-  reset_password_token: number | null;
+  reset_password_token: string;
 
-  @Column({ default: null })
+  @Column({ type: Date, default: null })
   @Exclude()
-  reset_password_expires: number;
+  reset_password_expires: Date;
 }

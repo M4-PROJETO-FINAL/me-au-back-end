@@ -6,8 +6,8 @@ import userForgotPasswordService from "../../services/users/userForgotPassword.s
 const UserForgotPasswordController = async (req: Request, res: Response) => {
 	const { email } = req.body;
 	console.log(email)
-	const userEmail = await userForgotPasswordService({ email });
-	return res.status(200).send(instanceToPlain(userEmail))
+	const codePassword = await userForgotPasswordService({ email });
+	return res.status(200).send({ codePassword })
 };
 
 

@@ -21,7 +21,7 @@ const userForgotPasswordService = async ({ email }: IUserPasswordProps) => {
     console.log(code)
 
     const messageEmail: IEmailRequest = {
-        subject: "Email confirmation - Me au PetHotel",
+        subject: "Reset password confirmation - Me au PetHotel",
         code: code,
         to: email
     }
@@ -30,14 +30,13 @@ const userForgotPasswordService = async ({ email }: IUserPasswordProps) => {
 
     // let expiryDate = Date.now() + 60 * 1000 * 20
 
-    userEmail.reset_password_token = code;
+    userEmail.reset_password_token = code.toString();
     // userEmail.reset_password_expires = expiryDate
 
     await userRepository.save(userEmail)
 
-    const user = await userRepository.findOneBy({email})
 
-    return user
+    return code.toString()
 };
 
 export default userForgotPasswordService;
