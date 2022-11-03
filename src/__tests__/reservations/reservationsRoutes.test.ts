@@ -485,123 +485,127 @@ describe("/users", () => {
 			.get("/reservations")
 			.set("Authorization", `Bearer ${adminLoginResponse.body.token}`);
 
-		expect(response.body).toHaveProperty("id");
-		expect(response.body).toHaveProperty("checkin");
-		expect(response.body).toHaveProperty("checkout");
-		expect(response.body).toHaveProperty("schedules");
-		expect(response.body.pet_rooms[0]).toHaveProperty("pet_id");
-		expect(response.body.pet_rooms[0]).toHaveProperty("room_type_id");
-		expect(response.body.services[0]).toHaveProperty("service_id");
-		expect(response.body.services[0]).toHaveProperty("amount");
-		expect(response.body).toHaveLength(1);
+		expect(response.body[0]).toHaveProperty('id');
+		expect(response.body[0]).toHaveProperty('checkin');
+		expect(response.body[0]).toHaveProperty('checkout');
+		expect(response.body[0]).toHaveProperty('status');
+		expect(response.body[0]).toHaveProperty('created_at');
+		expect(response.body[0]).toHaveProperty('updated_at');
 		expect(response.status).toBe(200);
 	});
 
-	test("GET /reservations - Must be able to list all reservations of the user", async () => {
-		const loginResponse = await request(app)
-			.post("/login")
-			.send(mockedUserLogin);
+	test('GET /reservations - Must be able to list all reservations of the user', async () => {
+		const adminLoginResponse = await request(app)
+			.post('/login')
+			.send(mockedAdminLogin);
 		const response = await request(app)
-			.get("/reservations")
-			.set("Authorization", `Bearer ${loginResponse.body.token}`);
+			.get('/reservations')
+			.set('Authorization', `Bearer ${adminLoginResponse.body.token}`);
 
-		expect(response.body).toHaveProperty("id");
-		expect(response.body).toHaveProperty("checkin");
-		expect(response.body).toHaveProperty("checkout");
-		expect(response.body).toHaveProperty("schedules");
-		expect(response.body.pet_rooms[0]).toHaveProperty("pet_id");
-		expect(response.body.pet_rooms[0]).toHaveProperty("room_type_id");
-		expect(response.body.services[0]).toHaveProperty("service_id");
-		expect(response.body.services[0]).toHaveProperty("amount");
-		expect(response.body).toHaveLength(1);
+		expect(response.body[0]).toHaveProperty('id');
+		expect(response.body[0]).toHaveProperty('checkin');
+		expect(response.body[0]).toHaveProperty('checkout');
+		expect(response.body[0]).toHaveProperty('status');
+		expect(response.body[0]).toHaveProperty('created_at');
+		expect(response.body[0]).toHaveProperty('updated_at');
 		expect(response.status).toBe(200);
 	});
 
 	test("GET /reservations - Should not be able to list reservations without authentication", async () => {
 		const response = await request(app).get("/reservations");
 
-		expect(response.body).toHaveProperty("message");
+		expect(response.body).toHaveProperty('message');
 		expect(response.status).toBe(401);
 	});
-	//NAO TERMINADA
-	test("DELETE /reservations/:id - Must be able to cancel the reservation", async () => {
-		await request(app).post("/users").send(mockedUser);
 
-		const userLoginResponse = await request(app)
-			.post("/login")
-			.send(mockedUserLogin);
+	test('DELETE /reservations/:id - Must be able to cancel the reservation', async () => {
+		await request(app).post('/users').send(mockedAdminLogin);
+
+		const adminLoginResponse = await request(app)
+			.post('/login')
+			.send(mockedAdminLogin);
+
 		const reservationTobeDeleted = await request(app)
-			.get("/users")
-			.set("Authorization", `Bearer ${userLoginResponse.body.token}`);
+			.get('/reservations')
+			.set('Authorization', `Bearer ${adminLoginResponse.body.token}`);
 
 		const response = await request(app)
 			.delete(`/reservations/${reservationTobeDeleted.body[0].id}`)
-			.set("Authorization", `Bearer ${userLoginResponse.body.token}`);
+			.set('Authorization', `Bearer ${adminLoginResponse.body.token}`);
+
+		const findUser = await request(app)
+			.get('/reservations')
+			.set('Authorization', `Bearer ${adminLoginResponse.body.token}`);
+
 		expect(response.status).toBe(204);
+		expect(findUser.body[0].status).toBe('cancelled');
 	});
 
-	test("DELETE /reservations/:id - Must be able to cancel the reservation of another user with adm permission", async () => {
-		const adminLoginResponse = await request(app)
-			.post("/login")
-			.send(mockedAdminLogin);
-		const ReservationTobeDeleted = await request(app)
-			.get("/reservations")
-			.set("Authorization", `Bearer ${adminLoginResponse.body.token}`);
-
-		const response = await request(app)
-			.delete(`/reservations/${ReservationTobeDeleted.body[0].id}`)
-			.set("Authorization", `Bearer ${adminLoginResponse.body.token}`);
-
-		expect(response.status).toBe(403);
-	});
-
-	test("DELETE - Should not be able to cancel the reservation of another user without adm permission", async () => {
+	test('DELETE - Should not be able to cancel the reservation of another user without adm permission', async () => {
 		const userLoginResponse = await request(app)
-			.post("/login")
+			.post('/login')
 			.send(mockedUserLogin);
 
 		const adminLoginResponse = await request(app)
-			.post("/login")
+			.post('/login')
 			.send(mockedAdminLogin);
 
 		const ReservationTobeDeleted = await request(app)
-			.get("/reservations")
-			.set("Authorization", `Bearer ${adminLoginResponse.body.token}`);
+			.get('/reservations')
+			.set('Authorization', `Bearer ${adminLoginResponse.body.token}`);
 
 		const response = await request(app)
 			.delete(`/reservations/${ReservationTobeDeleted.body[0].id}`)
-			.set("Authorization", `Bearer ${userLoginResponse.body.token}`);
+			.set('Authorization', `Bearer ${userLoginResponse.body.token}`);
 
 		expect(response.status).toBe(403);
 	});
 
-	test("DELETE - Should not be able to cancel the reservation with invalid id (param id)", async () => {
-		await request(app).post("/users").send(mockedAdmin);
+	test('DELETE - Should not be able to cancel the reservation with invalid id (param id)', async () => {
+		await request(app).post('/users').send(mockedAdmin);
 
 		const adminLoginResponse = await request(app)
-			.post("/login")
+			.post('/login')
 			.send(mockedAdminLogin);
 
 		const response = await request(app)
 			.delete(`/reservations/00000001-0fff-000f-0f1f-0f10f00111ff`)
-			.set("Authorization", `Bearer ${adminLoginResponse.body.token}`);
+			.set('Authorization', `Bearer ${adminLoginResponse.body.token}`);
 
 		expect(response.status).toBe(404);
 	});
 
-	test("DELETE - Should not be able to cancel the reservation without authentication", async () => {
+	test('DELETE - Should not be able to cancel the reservation without authentication', async () => {
 		const adminLoginResponse = await request(app)
-			.post("/login")
+			.post('/login')
 			.send(mockedAdminLogin);
 
 		const reservationTobeDeleted = await request(app)
-			.get("/reservations")
-			.set("Authorization", `Bearer ${adminLoginResponse.body.token}`);
+			.get('/reservations')
+			.set('Authorization', `Bearer ${adminLoginResponse.body.token}`);
 
 		const response = await request(app).delete(
 			`/reservations/${reservationTobeDeleted.body[0].id}`
 		);
 
 		expect(response.status).toBe(401);
+	});
+
+	test("DELETE /reservations/:id -  shouldn't be able to delete reservation with status = cancelled", async () => {
+		await request(app).post('/users').send(mockedAdmin);
+
+		const adminLoginResponse = await request(app)
+			.post('/login')
+			.send(mockedAdminLogin);
+
+		const ReservationTobeDeleted = await request(app)
+			.get('/reservations')
+			.set('Authorization', `Bearer ${adminLoginResponse.body.token}`);
+
+		const response = await request(app)
+			.delete(`/reservations/${ReservationTobeDeleted.body[0].id}`)
+			.set('Authorization', `Bearer ${adminLoginResponse.body.token}`);
+
+		expect(response.status).toBe(400);
 	});
 });

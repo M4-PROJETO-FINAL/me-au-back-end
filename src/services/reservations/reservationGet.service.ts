@@ -1,12 +1,13 @@
-import AppDataSource from "../../data-source";
-import { Reservation } from "../../entities/reservation.entity";
+import AppDataSource from '../../data-source';
+import { Reservation } from '../../entities/reservation.entity';
+import { IReservationResponse } from '../../interfaces/reservations';
 
-const reservationGetService = async () => {
-    const reservationRepository = AppDataSource.getRepository(Reservation);
+const reservationGetService = async ()=> {
+	const reservationRepository = AppDataSource.getRepository(Reservation);
 
-    const repository = await reservationRepository.find();
+	const reservation = await reservationRepository.find();
 
-    return repository
-}
+	return reservation;
+};
 
-export default reservationGetService
+export default reservationGetService;

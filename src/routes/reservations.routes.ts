@@ -11,7 +11,7 @@ import validateRequestReservationIds from "../middlewares/validateRequestReserva
 const routes = Router();
 
 routes.get("", authUser, validateIsAdm, reservationGetController);
-routes.get("/:id", authUser, reservationGetOneController);
+routes.get("/:id", authUser, reservationGetOneController);;
 routes.post(
 	"",
 	authUser,
@@ -19,6 +19,6 @@ routes.post(
 	validateRequestReservationIds,
 	reservationCreateController
 );
-routes.delete("/:id", authUser, reservationDeleteController);
+routes.delete("/:id", authUser, validateIsAdm, reservationDeleteController);
 
 export default routes;
