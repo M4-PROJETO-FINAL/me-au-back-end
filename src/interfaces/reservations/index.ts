@@ -1,5 +1,5 @@
-import { IService } from "./../services/index";
-import { IPetRoom } from "./../rooms/index";
+import { IService } from './../services/index';
+import { IPetRoom } from './../rooms/index';
 
 export interface IReservationRequest {
 	checkin: string;
@@ -29,7 +29,7 @@ export interface IServicesReservation {
 }
 export interface IReservationResponse {
 	id: string;
-	status: "reserved" | "active" | "concluded" | "cancelled";
+	status: 'reserved' | 'active' | 'concluded' | 'cancelled';
 	created_at: Date;
 	updated_at: Date;
 	checkin: Date;
