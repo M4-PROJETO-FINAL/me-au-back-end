@@ -7,7 +7,7 @@ const UserForgotPasswordController = async (req: Request, res: Response) => {
 	const { email } = req.body;
 	console.log(email)
 	const codePassword = await userForgotPasswordService({ email });
-	return res.status(200).send({ codePassword })
+	return res.status(200).send(codePassword)
 };
 
 
