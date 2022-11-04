@@ -12,7 +12,10 @@ export class ReservationService {
 
   @ManyToOne(
     () => Reservation,
-    (reservation) => reservation.reservation_services
+    (reservation) => reservation.reservation_services,
+    {
+      onDelete: "CASCADE",
+    }
   )
   reservation: Reservation;
 

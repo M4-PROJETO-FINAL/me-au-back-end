@@ -36,16 +36,18 @@ export class User {
   profile_img: string;
 
   @OneToMany(() => Review, (review) => review.user, {
-    nullable: true,
+    cascade: true,
   })
   reviews: Review[];
 
   @OneToMany(() => Pet, (pet) => pet.user, {
-    nullable: true,
+    cascade: true,
   })
   pets: Pet[];
 
-  @OneToMany(() => Reservation, (reservation) => reservation.user)
+  @OneToMany(() => Reservation, (reservation) => reservation.user, {
+    cascade: true,
+  })
   reservations: Reservation[];
 
   @Column({ default: null })

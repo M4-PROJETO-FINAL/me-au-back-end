@@ -11,7 +11,9 @@ export class ReservationPet {
   @ManyToOne(() => Pet, (pet) => pet.reservation_pets)
   pet: Pet;
 
-  @ManyToOne(() => Reservation, (reservation) => reservation.reservation_pets)
+  @ManyToOne(() => Reservation, (reservation) => reservation.reservation_pets, {
+    onDelete: "CASCADE",
+  })
   reservation: Reservation;
 
   @ManyToOne(() => Room, (room) => room.reservation_pets)

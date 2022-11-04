@@ -23,9 +23,6 @@ const reviewCreateService = async (
     where: {
       id: newReviewData.reservation_id,
     },
-    relations: {
-      review: true,
-    },
   });
 
   if (!reservationSelected) {
@@ -41,13 +38,11 @@ const reviewCreateService = async (
   review.review_text = newReviewData.review_text;
   review.stars = newReviewData.stars;
   review.user = owner;
+  review.reservation = reservationSelected;
 
   reviewRepository.create(review);
 
   const newReview = await reviewRepository.save(review);
-
-  reservationSelected.review = newReview;
-  await reservationRepository.save(reservationSelected);
 
   return newReview;
 };
