@@ -12,6 +12,10 @@ interface IUserResetPasswordProps {
 const userResetPasswordService = async ({ new_password, confirm_password }: IUserResetPasswordProps, code: string) => {
 	const userRepository = AppDataSource.getRepository(User);
     const userCode = await userRepository.findOneBy({reset_password_token: code})
+
+    if(!userCode) {
+        throw new AppError("Cannot be processed", 400)
+    }
 	
     if(new_password !== confirm_password) {
         throw new AppError("Passwords didn't match", 400)

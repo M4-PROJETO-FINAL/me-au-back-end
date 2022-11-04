@@ -296,4 +296,77 @@ describe("/users", () => {
 
 		expect(user).toBe(undefined);
 	});
+
+	test("PATCH /forgot - must be able to update user token password", async () => {
+		const user = await request(app).post("/users").send(mockedAdmin)
+
+		const response = await request(app).patch("/forgot").send({ email: user.body.email})
+
+    	expect(response.body).toHaveProperty("code");
+    	expect(response.body).toHaveProperty("expiryDate");
+    	expect(response.status).toBe(200);
+	});
+
+	test("PATCH /forgot - should not be able to update user token password with invalid email", async () => {
+		const response = await request(app).patch("/forgot").send({ email: "teste@teste.com" })
+
+    	expect(response.body).toHaveProperty("message");
+    	expect(response.status).toBe(400);
+	});
+
+	test("POST /forgot/verify - must be able to verify authentication code", async () => {
+		const user = await request(app).post("/users").send(mockedAdmin)
+		const email = await request(app).patch("/forgot").send({ email: user.body.email })
+		const response = await request(app).post("/forgot/verify").send({ code: email.body.code})
+
+    	expect(response.body).toHaveProperty("id");
+    	expect(response.body).toHaveProperty("name");
+    	expect(response.body).toHaveProperty("email");
+    	expect(response.status).toBe(200);
+	});
+
+	test("POST /forgot/verify - should not be able to verify invalid authentication code", async () => {
+		const response = await request(app).post("/forgot/verify").send({ code: 5555 })
+
+    	expect(response.body).toHaveProperty("message");
+    	expect(response.status).toBe(400);
+	});
+
+	test("PATCH /forgot/:code - must be able to update user password", async () => {
+		const user = await request(app).post("/users").send(mockedAdmin)
+		const email = await request(app).patch("/forgot").send({ email: user.body.email})
+		const code = await request(app).post("/forgot/verify").send({ code: email.body.code})
+
+		const updatePw = {
+			new_password: "test4321",
+			confirm_password: "test4321"
+		}
+
+		const response = await request(app).patch(`/forgot/${code.body.reset_password_token}`).send(updatePw)
+
+    	expect(response.status).toBe(200);
+	});
+
+	test("PATCH /forgot/:code - should not be able to reset user password with invalid code", async () => {
+		const response = await request(app).patch(`/forgot/4312`)
+
+		expect(response.body).toHaveProperty("message");
+    	expect(response.status).toBe(400);
+	});
+
+	test("PATCH /forgot/:code - should not be able to reset user password, with differents password on body", async () => {
+		const user = await request(app).post("/users").send(mockedAdmin)
+		const email = await request(app).patch("/forgot").send({ email: user.body.email})
+		const code = await request(app).post("/forgot/verify").send({ code: email.body.code})
+
+		const updatePw = {
+			new_password: "test4321",
+			confirm_password: "test432"
+		}
+
+		const response = await request(app).patch(`/forgot/${code.body.reset_password_token}`).send(updatePw)
+
+		expect(response.body).toHaveProperty("message");
+    	expect(response.status).toBe(400);
+	});
 });

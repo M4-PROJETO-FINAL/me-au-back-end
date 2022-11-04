@@ -18,8 +18,6 @@ const userForgotPasswordService = async ({ email }: IUserPasswordProps) => {
 
     const code = Math.floor(1000 + Math.random() * 9000)
 
-    console.log(code)
-
     const messageEmail: IEmailRequest = {
         subject: "Reset password confirmation - Me au PetHotel",
         code: code,
