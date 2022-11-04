@@ -32,7 +32,7 @@ export class Pet {
   docile: boolean;
 
   @ManyToOne(() => User, (user) => user.pets, {
-    nullable: true,
+    onDelete: "CASCADE",
   })
   user: User;
 
