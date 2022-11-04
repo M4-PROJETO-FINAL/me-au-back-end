@@ -2,8 +2,6 @@ import AppDataSource from "../../data-source";
 import { Review } from "../../entities/review.entity";
 import { User } from "../../entities/user.entity";
 import { AppError } from "../../errors/appError";
-import { Reservation } from "../../entities/reservation.entity";
-import { IsNull } from "typeorm";
 
 const reviewDeleteService = async (
   reviewId: string,
@@ -23,28 +21,8 @@ const reviewDeleteService = async (
   if (!owner) throw new AppError("Owner not found");
 
   if (owner.id === user.id) {
-    // const reservationRepository = AppDataSource.getRepository(Reservation);
-
-    // const userReservation = await reservationRepository.findOneBy({
-    //   review: reviewFound,
-    // });
-
-    // await reservationRepository.update(userReservation!.id, {
-    //   review: undefined,
-    // });
-
     await reviewRepository.delete(reviewId);
   } else if (user.is_adm) {
-    // const reservationRepository = AppDataSource.getRepository(Reservation);
-
-    // const userReservation = await reservationRepository.findOneBy({
-    //   review: reviewFound,
-    // });
-
-    // await reservationRepository.update(userReservation!.id, {
-    //   review: undefined,
-    // });
-
     await reviewRepository.delete(reviewId);
   } else {
     throw new AppError("You don't have permission!", 403);
