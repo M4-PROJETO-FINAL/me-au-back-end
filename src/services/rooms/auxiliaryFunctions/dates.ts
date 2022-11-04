@@ -8,24 +8,24 @@ import { Reservation } from "../../../entities/reservation.entity";
  * [earliestCheckin, latestCheckout]
  */
 export const getMinAndMaxDates = (
-	reservationArray: Reservation[]
+  reservationArray: Reservation[]
 ): [Date, Date] => {
-	if (reservationArray.length === 0) {
-		const now = new Date();
-		return [now, now];
-	}
-	let minCheckin = reservationArray[0].checkin;
-	let maxCheckout = reservationArray[0].checkout;
-	for (let i = 1; i < reservationArray.length; i++) {
-		const reservation = reservationArray[i];
-		if (reservation.checkin.getTime() < minCheckin.getTime()) {
-			minCheckin = reservation.checkin;
-		}
-		if (reservation.checkout.getTime() > maxCheckout.getTime()) {
-			maxCheckout = reservation.checkout;
-		}
-	}
-	return [minCheckin, maxCheckout];
+  if (reservationArray.length === 0) {
+    const now = new Date();
+    return [now, now];
+  }
+  let minCheckin = reservationArray[0].checkin;
+  let maxCheckout = reservationArray[0].checkout;
+  for (let i = 1; i < reservationArray.length; i++) {
+    const reservation = reservationArray[i];
+    if (reservation.checkin.getTime() < minCheckin.getTime()) {
+      minCheckin = reservation.checkin;
+    }
+    if (reservation.checkout.getTime() > maxCheckout.getTime()) {
+      maxCheckout = reservation.checkout;
+    }
+  }
+  return [minCheckin, maxCheckout];
 };
 
 /**
@@ -39,17 +39,14 @@ export const getMinAndMaxDates = (
  * // (except that dates are actually Date objects instead of strings)
  */
 export const getDatesInRange = (minDate: Date, maxDate: Date): Date[] => {
-	const dates: Date[] = [];
-	let currDate = minDate;
-	console.log("15115");
-	// change <= to < to exclude checkout date
-	console.log(minDate, "here", maxDate, "max");
+  const dates: Date[] = [];
+  let currDate = minDate;
 
-	while (currDate.getTime() < maxDate.getTime()) {
-		let newDate = new Date(currDate.getTime());
-		dates.push(newDate);
-		currDate.setDate(currDate.getDate() + 1);
-	}
+  while (currDate.getTime() < maxDate.getTime()) {
+    let newDate = new Date(currDate.getTime());
+    dates.push(newDate);
+    currDate.setDate(currDate.getDate() + 1);
+  }
 
-	return dates;
+  return dates;
 };
