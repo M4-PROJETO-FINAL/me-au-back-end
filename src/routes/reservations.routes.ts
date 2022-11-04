@@ -7,17 +7,19 @@ import { authUser } from "../middlewares/authUser.middleware";
 import validateCheckinCheckoutDates from "../middlewares/validateCheckinCheckoutDates.middlewares";
 import validateIsAdm from "../middlewares/validateIsAdm.middleware";
 import validateRequestReservationIds from "../middlewares/validateRequestReservationIds.middlewares";
+import validateIsCatOrDogMiddleware from "../middlewares/validateIsDogOrCat.middleware";
 
 const routes = Router();
 
 routes.get("", authUser, validateIsAdm, reservationGetController);
-routes.get("/:id", authUser, reservationGetOneController);;
+routes.get("/:id", authUser, reservationGetOneController);
 routes.post(
-	"",
-	authUser,
-	validateCheckinCheckoutDates,
-	validateRequestReservationIds,
-	reservationCreateController
+  "",
+  authUser,
+  validateCheckinCheckoutDates,
+  validateRequestReservationIds,
+  validateIsCatOrDogMiddleware,
+  reservationCreateController
 );
 routes.delete("/:id", authUser, validateIsAdm, reservationDeleteController);
 
