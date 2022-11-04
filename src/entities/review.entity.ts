@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   OneToOne,
   ManyToOne,
+  JoinColumn,
 } from "typeorm";
 import { Reservation } from "./reservation.entity";
 import { User } from "./user.entity";
@@ -20,12 +21,13 @@ export class Review {
   stars: number;
 
   @OneToOne(() => Reservation, {
-    nullable: true,
+    onDelete: "CASCADE",
   })
+  @JoinColumn()
   reservation: Reservation;
 
   @ManyToOne(() => User, (user) => user.reviews, {
-    nullable: true,
+    onDelete: "CASCADE",
   })
   user: User;
 }
