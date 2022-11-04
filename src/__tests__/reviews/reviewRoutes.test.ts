@@ -235,7 +235,7 @@ describe("/reviews", () => {
     expect(response.status).toBe(200);
   });
 
-  test("PATCH /reviews/:id It should not be possible to edit review with more than 5 stars", async () => {
+  test("PATCH /reviews/:id it should not be possible to edit review with more than 5 stars", async () => {
     const loginResponse = await request(app)
       .post("/login")
       .send(mockedAdminLogin);
@@ -254,7 +254,7 @@ describe("/reviews", () => {
     expect(response.status).toBe(400);
   });
 
-  test("PATCH /reviews/:id It should not be possible to edit a review with less than 1 star", async () => {
+  test("PATCH /reviews/:id it should not be possible to edit a review with less than 1 star", async () => {
     const loginResponse = await request(app)
       .post("/login")
       .send(mockedAdminLogin);
@@ -271,5 +271,74 @@ describe("/reviews", () => {
 
     expect(response.body).toHaveProperty("message");
     expect(response.status).toBe(400);
+  });
+
+  test("DELETE /reviews/:id should be able to delete a review with authentication", async () => {
+    const loginResponse = await request(app)
+      .post("/login")
+      .send(mockedUserLogin);
+    const deleteReview = await request(app).get("/reviews");
+    const response = await request(app).delete(
+      `/reviews/${deleteReview.body[0].id}`
+    );
+
+    expect(response.body).toHaveProperty("message");
+    expect(response.status).toBe(401);
+  });
+
+  test("DELETE /reviews/:id should be able to delete a review", async () => {
+    const loginResponse = await request(app)
+      .post("/login")
+      .send(mockedUserLogin);
+    const response = await request(app)
+      .get("/reviews")
+      .set("Authorization", `Bearer ${loginResponse.body.token}`);
+    const responseDelete = await request(app)
+      .delete(`/reviews/${response.body[0].id}`)
+      .set("Authorization", `Bearer ${loginResponse.body.token}`);
+
+    expect(responseDelete.status).toBe(204);
+  });
+
+  test("DELETE /reviews/:id should be able to delete any review if ADM", async () => {
+    const loginResponse = await request(app)
+      .post("/login")
+      .send(mockedUserLogin);
+    const mockRes = { ...mockedReservation };
+    mockRes.pet_rooms = [
+      {
+        pet_id: createdDog.id,
+        room_type_id: typeRoom[0].id,
+      },
+    ];
+    mockRes.services = [
+      {
+        service_id: services[3].id,
+        amount: 2,
+      },
+    ];
+    const response = await request(app)
+      .post("/reservations")
+      .set("Authorization", `Bearer ${loginResponse.body.token}`)
+      .send(mockRes);
+    reservation = response.body;
+    const mockRev = { ...mockedReview };
+    mockRev.reservation_id = response.body.id;
+    const responseReview = await request(app)
+      .post("/reviews")
+      .set("Authorization", `Bearer ${loginResponse.body.token}`)
+      .send(mockRev);
+
+    const loginAdminResponse = await request(app)
+      .post("/login")
+      .send(mockedAdminLogin);
+    const deleteAdminReview = await request(app)
+      .get("/reviews")
+      .set("Authorization", `Bearer ${loginAdminResponse.body.token}`);
+    const responseDelete = await request(app)
+      .delete(`/reviews/${deleteAdminReview.body[0].id}`)
+      .set("Authorization", `Bearer ${loginAdminResponse.body.token}`);
+
+    expect(responseDelete.status).toBe(204);
   });
 });
