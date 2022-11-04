@@ -41,18 +41,8 @@ const reservationGetService = async () => {
 			}),
 		};
 	});
-	// const reservation = await AppDataSource.getRepository(Reservation)
-	// 	.createQueryBuilder('reservation')
-	// 	.leftJoinAndSelect('reservation.reservation_pets', 'reservation_pets')
-	// 	.leftJoinAndSelect('reservation.reservation_services', 'reservation_services')
-	// 	.leftJoinAndSelect('reservation_services.service', 'service')
-	// 	.leftJoinAndSelect('reservation_pets.room', 'room')
-	// 	.leftJoinAndSelect('room.room_type', 'room_type')
-	// 	.getMany();
 
 	return treatedPetRoom;
 };
 
 export default reservationGetService;
-
-//.select(['reservation.checkin', 'reservation_pets.pet.name'])
