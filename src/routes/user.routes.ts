@@ -21,29 +21,23 @@ import UserResetPasswordController from '../controllers/users/userResetPassword.
 
 const routes = Router();
 
-routes.post(
-	'/users',
-	validateUserCreate(userCreateSchema),
-	userCreateController
-);
-routes.post('/login', UserLoginController);
-routes.get('/users', authUser, UserGetController);
-routes.patch(
-	'/users/:id',
-	validateUserExists,
-	authUser,
-	// validateUserUpdate(userUpdateSchema),
-	userUpdateController
-);
-routes.delete(
-	'/users/:id',
-	validateUserExists,
-	authUser,
-	validateIsAdm,
-	userDeleteController
-);
-routes.patch('/forgot', UserForgotPasswordController)
-routes.post('/forgot/verify', UserVerifyPwController)
-routes.patch('/forgot/:code', UserResetPasswordController)
+export const userRoutes = () => {
+	routes.post('', validateUserCreate(userCreateSchema), userCreateController);
+	routes.get('', authUser, UserGetController);
+	routes.patch(
+		'/:id',
+		validateUserExists,
+		authUser,
+		// validateUserUpdate(userUpdateSchema),
+		userUpdateController
+	);
+	routes.delete(
+		'/:id',
+		validateUserExists,
+		authUser,
+		validateIsAdm,
+		userDeleteController
+	);
 
-export default routes;
+	return routes;
+};

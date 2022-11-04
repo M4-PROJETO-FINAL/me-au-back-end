@@ -3,6 +3,8 @@ import servicesGetController from '../controllers/services/servicesGet.controlle
 
 const routes = Router();
 
-routes.get("", servicesGetController);
+export const servicesRoutes = () => {
+	routes.get('', servicesGetController);
 
-export default routes;
+	return routes;
+};
