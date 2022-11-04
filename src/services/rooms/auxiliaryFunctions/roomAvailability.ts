@@ -4,6 +4,7 @@ import { Reservation } from "../../../entities/reservation.entity";
 import { Room } from "../../../entities/room.entity";
 import { RoomType } from "../../../entities/roomType.entity";
 import { AppError } from "../../../errors/appError";
+import { ReservationPet } from "../../../entities/reservationPet.entity";
 
 /**
  * Returns an array with all reservations made for a particular room type,
@@ -98,7 +99,8 @@ export const existsAvailableRoom = async (
 export const getAvailableRoom = async (
   checkin: Date,
   checkout: Date,
-  room_type_id: string
+  room_type_id: string,
+  currentReservationPets: ReservationPet[]
 ): Promise<Room> => {
   const roomTypesRepository = AppDataSource.getRepository(RoomType);
   const roomType = await roomTypesRepository.findOneBy({ id: room_type_id });
@@ -133,31 +135,41 @@ export const getAvailableRoom = async (
   const reservationsOfThatRoomType = await getAllReservationsOfAGivenRoomType(
     room_type_id
   );
+
   const conflictingReservationsOfThatRoomType =
     reservationsOfThatRoomType.filter((res) => {
-      const resCheckin = res.checkin.getTime();
-      const resCheckout = res.checkout.getTime();
+      const resCheckin = res.checkin.getTime(); // 03/04
+      const resCheckout = res.checkout.getTime(); // 11/04
 
-      const myCheckin = checkin.getTime();
-      const myCheckout = checkout.getTime();
+      const myCheckin = checkin.getTime(); // 03/04
+      const myCheckout = checkout.getTime(); // 11/04
 
       return (
         (resCheckout > myCheckin && resCheckout <= myCheckout) ||
         (resCheckin >= myCheckin && resCheckin < myCheckout) ||
-        (resCheckin < myCheckin && resCheckout > myCheckout)
+        (resCheckin <= myCheckin && resCheckout >= myCheckout)
       );
     });
+  console.log("conflicting reservations:");
+  console.log(conflictingReservationsOfThatRoomType);
+
+  // quartos já ocupados NESSA reserva q está sendo criada agr:
+  const alreadyOccupiedRoomsIds = currentReservationPets.map(
+    (resPet) => resPet.room.id
+  );
 
   const allRoomsOfThatType = allRooms.filter(
     (room) => room.room_type.id === room_type_id
   );
-  const idsOfAvailableRoomsOfThatType = allRoomsOfThatType.map(
-    (room) => room.id
-  );
+  const idsOfAvailableRoomsOfThatType = allRoomsOfThatType
+    .map((room) => room.id)
+    .filter((roomId) => !alreadyOccupiedRoomsIds.includes(roomId));
+  // remover quartos que já foram alocados pra 2 pets nessa reserva:
 
   for (let i = 0; i < conflictingReservationsOfThatRoomType.length; i++) {
     const reservation = conflictingReservationsOfThatRoomType[i];
     const reservationPets = reservation.reservation_pets;
+    console.log(`i=${i}, reservationPets=${reservationPets}`);
     reservationPets.forEach((resPet) => {
       if (idsOfAvailableRoomsOfThatType.includes(resPet.room.id)) {
         const idx = idsOfAvailableRoomsOfThatType.indexOf(resPet.room.id);
@@ -174,6 +186,6 @@ export const getAvailableRoom = async (
   );
   if (!availableRoom)
     throw new AppError("OUTRO ERRO IMPOSSÍVEL, CALA A BOCA TYPESCRIPT");
-
+  console.log(availableRoom, "esta vindo certo?? ");
   return availableRoom;
 };
