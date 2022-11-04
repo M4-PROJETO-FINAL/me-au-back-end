@@ -34,7 +34,7 @@ const validateIsCatOrDogMiddleware = async (
 
     if (
       (petFound.type === "cat" && roomFound.title.includes("cães")) ||
-      roomFound.title.includes("Compartilhado")
+      (petFound.type === "cat" && roomFound.title.includes("Compartilhado"))
     ) {
       throw new AppError("Pet incompatible with the room", 400);
     }
