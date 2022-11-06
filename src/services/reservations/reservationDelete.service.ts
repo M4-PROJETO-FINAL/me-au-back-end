@@ -1,29 +1,44 @@
-import { Reservation } from '../../entities/reservation.entity';
-import AppDataSource from '../../data-source';
-import { AppError } from '../../errors/appError';
+import { Reservation } from "../../entities/reservation.entity";
+import AppDataSource from "../../data-source";
+import { AppError } from "../../errors/appError";
 
-interface IReservationDelete {
-	id: string;
-}
+const reservationDeleteService = async (
+  reservationId: string,
+  userId: string,
+  isAdm: boolean
+) => {
+  const reservationRepository = AppDataSource.getRepository(Reservation);
 
-const reservationDeleteService = async ({ id }: IReservationDelete) => {
-	const reservationRepository = AppDataSource.getRepository(Reservation);
+  const reservations = await reservationRepository.find({
+    where: {
+      id: reservationId,
+    },
+    relations: {
+      user: true,
+    },
+  });
 
-	const reservations = await reservationRepository.findOneBy({ id });
+  if (reservations.length === 0) {
+    throw new AppError("Reservation does not exists", 404);
+  }
+  const reservation = reservations[0];
 
-	if (!reservations) {
-		throw new AppError('Reservation does not exists', 404);
-	}
+  if (reservation.status === "cancelled") {
+    throw new AppError("Reservation does not exist");
+  }
 
-	if (reservations.status === 'cancelled') {
-		throw new AppError('Reservation does not exists', 400);
-	}
+  const ownerId = reservation.user.id;
+  if (userId !== ownerId && !isAdm)
+    throw new AppError(
+      "Cannot delete this reservation without admin permissions",
+      403
+    );
 
-	await reservationRepository.update(reservations!.id, {
-		status: (reservations!.status = 'cancelled'),
-	});
+  await reservationRepository.update(reservation.id, {
+    status: (reservation.status = "cancelled"),
+  });
 
-	return reservations!;
+  return reservation;
 };
 
 export default reservationDeleteService;

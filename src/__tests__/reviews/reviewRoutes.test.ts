@@ -111,7 +111,7 @@ describe("/reviews", () => {
     expect(response.status).toBe(400);
   });
 
-  test("POST /reviews - must not be able to record a star rating of less than 1 star", async () => {
+  test("POST /reviews - should not be able to record a star rating of less than 1 star", async () => {
     const userLoginResponse = await request(app)
       .post("/login")
       .send(mockedAdminLogin);
@@ -180,7 +180,7 @@ describe("/reviews", () => {
     expect(response.status).toBe(200);
   });
 
-  test("PATCH /reviews/:id should be able to edit a review", async () => {
+  test("PATCH /reviews/:id - should be able to edit a review", async () => {
     const loginResponse = await request(app)
       .post("/login")
       .send(mockedUserLogin);
@@ -199,7 +199,7 @@ describe("/reviews", () => {
     expect(response.status).toBe(200);
   });
 
-  test("PATCH /reviews/:id should only be able to edit a review with authentication", async () => {
+  test("PATCH /reviews/:id - should only be able to edit a review with authentication", async () => {
     const loginResponse = await request(app)
       .post("/login")
       .send(mockedUserLogin);
@@ -212,7 +212,7 @@ describe("/reviews", () => {
     expect(response.status).toBe(401);
   });
 
-  test("PATCH /reviews/:id should  be able to edit any review if adm", async () => {
+  test("PATCH /reviews/:id - admin should be able to edit any review", async () => {
     const loginResponse = await request(app)
       .post("/login")
       .send(mockedAdminLogin);
@@ -235,7 +235,7 @@ describe("/reviews", () => {
     expect(response.status).toBe(200);
   });
 
-  test("PATCH /reviews/:id it should not be possible to edit review with more than 5 stars", async () => {
+  test("PATCH /reviews/:id - should not be possible to edit review with more than 5 stars", async () => {
     const loginResponse = await request(app)
       .post("/login")
       .send(mockedAdminLogin);
@@ -254,7 +254,7 @@ describe("/reviews", () => {
     expect(response.status).toBe(400);
   });
 
-  test("PATCH /reviews/:id it should not be possible to edit a review with less than 1 star", async () => {
+  test("PATCH /reviews/:id - should not be possible to edit a review with less than 1 star", async () => {
     const loginResponse = await request(app)
       .post("/login")
       .send(mockedAdminLogin);
@@ -273,7 +273,7 @@ describe("/reviews", () => {
     expect(response.status).toBe(400);
   });
 
-  test("DELETE /reviews/:id should be able to delete a review with authentication", async () => {
+  test("DELETE /reviews/:id - should be able to delete a review with authentication", async () => {
     const loginResponse = await request(app)
       .post("/login")
       .send(mockedUserLogin);
@@ -286,7 +286,7 @@ describe("/reviews", () => {
     expect(response.status).toBe(401);
   });
 
-  test("DELETE /reviews/:id should be able to delete a review", async () => {
+  test("DELETE /reviews/:id - should be able to delete a review", async () => {
     const loginResponse = await request(app)
       .post("/login")
       .send(mockedUserLogin);
@@ -300,7 +300,7 @@ describe("/reviews", () => {
     expect(responseDelete.status).toBe(204);
   });
 
-  test("DELETE /reviews/:id should be able to delete any review if ADM", async () => {
+  test("DELETE /reviews/:id - should be able to delete any review if ADM", async () => {
     const loginResponse = await request(app)
       .post("/login")
       .send(mockedUserLogin);

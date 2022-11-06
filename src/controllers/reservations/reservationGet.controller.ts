@@ -1,11 +1,12 @@
 import { instanceToPlain } from "class-transformer";
-import { Request, Response } from 'express';
-import reservationGetService from '../../services/reservations/reservationGet.service';
+import { Request, Response } from "express";
+import reservationGetService from "../../services/reservations/reservationGet.service";
 
 const reservationGetController = async (req: Request, res: Response) => {
-	const reservation = await reservationGetService();
+  const { id, is_adm } = req.user;
+  const reservation = await reservationGetService(id, is_adm);
 
-	return res.status(200).json(instanceToPlain(reservation));
+  return res.status(200).json(instanceToPlain(reservation));
 };
 
 export default reservationGetController;
