@@ -1,5 +1,12 @@
+import request from "supertest";
 import { DataSource } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
+import app from "../../app";
+import AppDataSource from "../../data-source";
+import { Pet } from "../../entities/pet.entity";
+import { RoomType } from "../../entities/roomType.entity";
+import { IReservationRequest } from "../../interfaces/reservations";
+import { mockedUserLogin } from "../mocks";
 
 export const insertRoomTypes = async (dataSource: DataSource) => {
   const queryRunner = dataSource.createQueryRunner();
@@ -40,3 +47,184 @@ export const insertServices = async (dataSource: DataSource) => {
     ('${uuidv4()}', 'Ração', 'Uma porção de ração premium gourmet', 10)`
   );
 };
+
+export async function put20DogsInTheSharedRoom() {
+  const token = (await request(app).post("/login").send(mockedUserLogin)).body
+    .token;
+  const dogs = await register20Dogs(token);
+  await make20Reservations(dogs, token);
+}
+
+async function register20Dogs(token: string): Promise<Pet[]> {
+  const dogs: Pet[] = [];
+  for (let i = 1; i <= 20; i++) {
+    const newDog = {
+      name: `Doguinho ${i}`,
+      type: "dog",
+      age: "1 ano",
+      neutered: true,
+      vaccinated: true,
+      docile: true,
+    } as Pet;
+    const response = await request(app)
+      .post("/pets")
+      .set("Authorization", `Bearer ${token}`)
+      .send(newDog);
+    dogs.push(response.body);
+  }
+
+  return dogs;
+}
+
+async function make20Reservations(dogs: Pet[], token: string) {
+  const roomTypeRepository = AppDataSource.getRepository(RoomType);
+  const sharedRoom = await roomTypeRepository.findOneBy({
+    title: "Quarto Compartilhado",
+  });
+  // first half of the resevations will be for [2023-01-17, 2023-01-22]
+  // other half will be for [2023-01-20, 2023-01-22]
+  // expected dates when room is full: 2023-01-20, 2023-01-21
+  const firstHalf = dogs.slice(0, 10);
+  for (let i = 0; i < firstHalf.length; i++) {
+    const dog = firstHalf[i];
+    const reservationRequest = {
+      checkin: "2023-01-17",
+      checkout: "2023-01-22",
+      pet_rooms: [
+        {
+          pet_id: dog.id,
+          room_type_id: sharedRoom!.id,
+        },
+      ],
+    } as IReservationRequest;
+    await request(app)
+      .post("/reservations")
+      .set("Authorization", `Bearer ${token}`)
+      .send(reservationRequest);
+  }
+
+  const secondHalf = dogs.slice(10);
+  for (let i = 0; i < secondHalf.length; i++) {
+    const dog = secondHalf[i];
+    const reservationRequest = {
+      checkin: "2023-01-20",
+      checkout: "2023-01-22",
+      pet_rooms: [
+        {
+          pet_id: dog.id,
+          room_type_id: sharedRoom!.id,
+        },
+      ],
+    } as IReservationRequest;
+    await request(app)
+      .post("/reservations")
+      .set("Authorization", `Bearer ${token}`)
+      .send(reservationRequest);
+  }
+}
+
+export async function occupy4CatRooms() {
+  const token = (await request(app).post("/login").send(mockedUserLogin)).body
+    .token;
+  const cats = await register4Cats(token);
+  await make4CatRoomReservations(cats, token);
+}
+
+export async function occupy2CatRoomsWith4Cats() {
+  const token = (await request(app).post("/login").send(mockedUserLogin)).body
+    .token;
+  const cats = await register4Cats(token);
+  await make2ReservationsFor4Cats(cats, token);
+}
+
+async function register4Cats(token: string): Promise<Pet[]> {
+  const cats: Pet[] = [];
+  for (let i = 1; i <= 4; i++) {
+    const newCat = {
+      name: `Gatinho ${i}`,
+      type: "cat",
+      age: "1 ano",
+      neutered: true,
+      vaccinated: true,
+      docile: true,
+    } as Pet;
+    const response = await request(app)
+      .post("/pets")
+      .set("Authorization", `Bearer ${token}`)
+      .send(newCat);
+    cats.push(response.body);
+  }
+
+  return cats;
+}
+
+async function make4CatRoomReservations(cats: Pet[], token: string) {
+  const roomTypeRepository = AppDataSource.getRepository(RoomType);
+  const catRoom = await roomTypeRepository.findOneBy({
+    title: "Quarto Privativo (gatos)",
+  });
+
+  for (let i = 0; i < cats.length; i++) {
+    const cat = cats[i];
+    const reservationRequest = {
+      checkin: "2023-01-13",
+      checkout: "2023-01-16",
+      pet_rooms: [
+        {
+          pet_id: cat.id,
+          room_type_id: catRoom!.id,
+        },
+      ],
+    } as IReservationRequest;
+    await request(app)
+      .post("/reservations")
+      .set("Authorization", `Bearer ${token}`)
+      .send(reservationRequest);
+  }
+}
+
+async function make2ReservationsFor4Cats(cats: Pet[], token: string) {
+  if (cats.length !== 4) return console.error("cats should be of length 4");
+
+  const roomTypeRepository = AppDataSource.getRepository(RoomType);
+  const catRoom = await roomTypeRepository.findOneBy({
+    title: "Quarto Privativo (gatos)",
+  });
+
+  const reservationRequest1 = {
+    checkin: "2023-01-13",
+    checkout: "2023-01-16",
+    pet_rooms: [
+      {
+        pet_id: cats[0].id,
+        room_type_id: catRoom!.id,
+      },
+      {
+        pet_id: cats[1].id,
+        room_type_id: catRoom!.id,
+      },
+    ],
+  } as IReservationRequest;
+  const reservationRequest2 = {
+    checkin: "2023-01-13",
+    checkout: "2023-01-16",
+    pet_rooms: [
+      {
+        pet_id: cats[2].id,
+        room_type_id: catRoom!.id,
+      },
+      {
+        pet_id: cats[3].id,
+        room_type_id: catRoom!.id,
+      },
+    ],
+  } as IReservationRequest;
+  await request(app)
+    .post("/reservations")
+    .set("Authorization", `Bearer ${token}`)
+    .send(reservationRequest1);
+  await request(app)
+    .post("/reservations")
+    .set("Authorization", `Bearer ${token}`)
+    .send(reservationRequest2);
+}

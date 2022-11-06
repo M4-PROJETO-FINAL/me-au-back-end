@@ -34,7 +34,7 @@ describe("/pets", () => {
     await connection.destroy();
   });
 
-  test("POST /pets -  should not be able to register a pet if not authenticated", async () => {
+  test("POST /pets - should not be able to register a pet if not authenticated", async () => {
     const response = await request(app).post("/pets").send(mockedCat);
 
     expect(response.body).toHaveProperty("message");
@@ -114,8 +114,6 @@ describe("/pets", () => {
       .patch(`/pets/${adminCreatedPet.id}`)
       .send(mockedEditPet)
       .set("Authorization", `Bearer ${userLoginResponse.body.token}`);
-    console.log("adminCreatedPet", adminCreatedPet);
-    console.log("userLoginResponse", userLoginResponse.body.token);
 
     expect(response.body).toHaveProperty("message");
     expect(response.status).toBe(403);
