@@ -13,23 +13,38 @@ const reviewCreateService = async (
   const userRepository = AppDataSource.getRepository(User);
   const reservationRepository = AppDataSource.getRepository(Reservation);
 
+  const validadeReservation = await reservationRepository.findOne({
+    where: {
+      id: newReviewData.reservation_id,
+    },
+  });
+
   const owner = await userRepository.findOneBy({
     id: userId,
   });
 
   if (!owner) throw new AppError("Logged in user doesn't exist (impossible)");
 
-  const reservationSelected = await reservationRepository.findOne({
-    where: {
-      id: newReviewData.reservation_id,
+  const allReviews = await reviewRepository.find({
+    relations: {
+      reservation: true,
     },
   });
 
-  if (!reservationSelected) {
+  if (!validadeReservation) {
     throw new AppError("Reservation not found!", 401);
   }
 
-  if (reservationSelected.review) {
+  // descomentar assim que a reservation tiver a atualização automatica!
+  // if (validadeReservation.status !== "concluded") {
+  //   throw new AppError("This reservarion is not concluded!", 401);
+  // }
+
+  const isAlreadyReview = allReviews.find(
+    (el) => el.reservation.id === newReviewData.reservation_id
+  );
+
+  if (isAlreadyReview) {
     throw new AppError("This reservation has already been rated!", 401);
   }
 
@@ -38,7 +53,7 @@ const reviewCreateService = async (
   review.review_text = newReviewData.review_text;
   review.stars = newReviewData.stars;
   review.user = owner;
-  review.reservation = reservationSelected;
+  review.reservation = validadeReservation;
 
   reviewRepository.create(review);
 
