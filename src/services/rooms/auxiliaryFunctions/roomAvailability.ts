@@ -1,13 +1,14 @@
-import { getDatesInRange } from "./dates";
+import { areDatesConflicting, getDatesInRange } from "./dates";
 import AppDataSource from "../../../data-source";
 import { Reservation } from "../../../entities/reservation.entity";
 import { Room } from "../../../entities/room.entity";
 import { RoomType } from "../../../entities/roomType.entity";
 import { AppError } from "../../../errors/appError";
+import { ReservationPet } from "../../../entities/reservationPet.entity";
 
 /**
  * Returns an array with all reservations made for a particular room type,
- * specified by the parameter
+ * specified by the parameter. Does not include cancelled or concluded reservations.
  */
 export const getAllReservationsOfAGivenRoomType = async (
   room_type_id: string
@@ -28,7 +29,10 @@ export const getAllReservationsOfAGivenRoomType = async (
       }
     );
 
-    return reservationRoomsTypesIds.includes(room_type_id);
+    return (
+      reservationRoomsTypesIds.includes(room_type_id) &&
+      (reservation.status === "reserved" || reservation.status === "active")
+    );
   });
 
   return reservationsOfSameRoomType;
@@ -98,7 +102,8 @@ export const existsAvailableRoom = async (
 export const getAvailableRoom = async (
   checkin: Date,
   checkout: Date,
-  room_type_id: string
+  room_type_id: string,
+  currentReservationPets: ReservationPet[]
 ): Promise<Room> => {
   const roomTypesRepository = AppDataSource.getRepository(RoomType);
   const roomType = await roomTypesRepository.findOneBy({ id: room_type_id });
@@ -133,27 +138,24 @@ export const getAvailableRoom = async (
   const reservationsOfThatRoomType = await getAllReservationsOfAGivenRoomType(
     room_type_id
   );
+
   const conflictingReservationsOfThatRoomType =
     reservationsOfThatRoomType.filter((res) => {
-      const resCheckin = res.checkin.getTime();
-      const resCheckout = res.checkout.getTime();
-
-      const myCheckin = checkin.getTime();
-      const myCheckout = checkout.getTime();
-
-      return (
-        (resCheckout > myCheckin && resCheckout <= myCheckout) ||
-        (resCheckin >= myCheckin && resCheckin < myCheckout) ||
-        (resCheckin < myCheckin && resCheckout > myCheckout)
-      );
+      return areDatesConflicting(checkin, checkout, res.checkin, res.checkout);
     });
+
+  // quartos já ocupados NESSA reserva q está sendo criada agr:
+  const alreadyOccupiedRoomsIds = currentReservationPets.map(
+    (resPet) => resPet.room.id
+  );
 
   const allRoomsOfThatType = allRooms.filter(
     (room) => room.room_type.id === room_type_id
   );
-  const idsOfAvailableRoomsOfThatType = allRoomsOfThatType.map(
-    (room) => room.id
-  );
+  const idsOfAvailableRoomsOfThatType = allRoomsOfThatType
+    .map((room) => room.id)
+    .filter((roomId) => !alreadyOccupiedRoomsIds.includes(roomId));
+  // remover quartos que já foram alocados pra 2 pets nessa reserva:
 
   for (let i = 0; i < conflictingReservationsOfThatRoomType.length; i++) {
     const reservation = conflictingReservationsOfThatRoomType[i];
@@ -174,6 +176,5 @@ export const getAvailableRoom = async (
   );
   if (!availableRoom)
     throw new AppError("OUTRO ERRO IMPOSSÍVEL, CALA A BOCA TYPESCRIPT");
-
   return availableRoom;
 };

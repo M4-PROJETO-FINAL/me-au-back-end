@@ -41,10 +41,34 @@ export const getMinAndMaxDates = (
 export const getDatesInRange = (minDate: Date, maxDate: Date): Date[] => {
   const dates: Date[] = [];
   let currDate = minDate;
+
   while (currDate.getTime() < maxDate.getTime()) {
-    dates.push(currDate);
+    let newDate = new Date(currDate.getTime());
+    dates.push(newDate);
     currDate.setDate(currDate.getDate() + 1);
   }
 
   return dates;
+};
+
+/**
+ * Returns true if the time interval specified by the first pair of parameters is somehow conflicting with the time interval specified by the second pair of parameters.
+ *
+ */
+export const areDatesConflicting = (
+  startDate1: Date,
+  endDate1: Date,
+  startDate2: Date,
+  endDate2: Date
+) => {
+  const start1 = startDate1.getTime();
+  const end1 = endDate1.getTime();
+  const start2 = startDate2.getTime();
+  const end2 = endDate2.getTime();
+
+  return (
+    (end2 > start1 && end2 <= end1) ||
+    (start2 >= start1 && start2 < end1) ||
+    (start2 <= start1 && end2 >= end1)
+  );
 };

@@ -8,7 +8,15 @@ import {
   mockedUser,
   mockedUserLogin,
 } from "../mocks";
-import { insertRooms, insertRoomTypes } from "../insertQuerys";
+import {
+  insertRooms,
+  insertRoomTypes,
+  occupy2CatRoomsWith4Cats,
+  occupy4CatRooms,
+  put20DogsInTheSharedRoom,
+} from "../insertQuerys";
+import { IReservationResponse } from "../../interfaces/reservations";
+import { RoomType } from "../../entities/roomType.entity";
 
 describe("/rooms", () => {
   let connection: DataSource;
@@ -77,7 +85,61 @@ describe("/rooms", () => {
     expect(response.status).toBe(200);
   });
 
-  test("GET /rooms/dates/:roomTypeId - should be able to list all dates in which a room type is unavailable", async () => {
-    // requires POST /reservation route
+  test("GET /rooms/dates/:roomTypeId - should be able to list all dates in which the shared room is unavailable", async () => {
+    await put20DogsInTheSharedRoom();
+    const roomTypeRepository = AppDataSource.getRepository(RoomType);
+    const sharedRoom = await roomTypeRepository.findOneBy({
+      title: "Quarto Compartilhado",
+    });
+
+    const response = await request(app).get(`/rooms/dates/${sharedRoom!.id}`);
+
+    expect(response.body.length).toEqual(2);
+    expect(response.body[0].toString().includes("2023-01-20")).toBe(true);
+    expect(response.body[1].toString().includes("2023-01-21")).toBe(true);
+    expect(response.status).toBe(200);
+  });
+
+  test("GET /rooms/dates/:roomTypeId - should be able to list all dates in which a private room type is unavailable", async () => {
+    await occupy4CatRooms();
+    const roomTypeRepository = AppDataSource.getRepository(RoomType);
+    const catRoom = await roomTypeRepository.findOneBy({
+      title: "Quarto Privativo (gatos)",
+    });
+
+    const response = await request(app).get(`/rooms/dates/${catRoom!.id}`);
+
+    expect(response.body.length).toEqual(3);
+    expect(response.body[0].toString().includes("2023-01-13")).toBe(true);
+    expect(response.body[1].toString().includes("2023-01-14")).toBe(true);
+    expect(response.body[2].toString().includes("2023-01-15")).toBe(true);
+    expect(response.status).toBe(200);
+    const loginResponse = await request(app)
+      .post("/login")
+      .send(mockedUserLogin);
+
+    // cancel all 4 cat room reservations:
+    const reservationsResponse = await request(app)
+      .get("/reservations")
+      .set("Authorization", `Bearer ${loginResponse.body.token}`);
+    const reservations: IReservationResponse[] = reservationsResponse.body;
+    const reservationsIds = reservations.map((res) => res.id);
+    for (let resId of reservationsIds) {
+      await request(app)
+        .delete(`/reservations/${resId}`)
+        .set("Authorization", `Bearer ${loginResponse.body.token}`);
+    }
+  });
+
+  test("GET /rooms/dates/:roomTypeId - two pets in the same reservation requested in the same room type should be put in the same room together", async () => {
+    await occupy2CatRoomsWith4Cats();
+    const roomTypeRepository = AppDataSource.getRepository(RoomType);
+    const catRoom = await roomTypeRepository.findOneBy({
+      title: "Quarto Privativo (gatos)",
+    });
+
+    const response = await request(app).get(`/rooms/dates/${catRoom!.id}`);
+
+    expect(response.body.length).toEqual(0);
   });
 });

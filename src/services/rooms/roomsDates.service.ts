@@ -31,18 +31,22 @@ const roomsDatesService = async (room_type_id: string) => {
   if (roomType.title === "Quarto Compartilhado") {
     const sharedRoomCapacity = roomType.capacity;
 
-    const dates = allDates.filter(async (date) => {
-      const numOfPets = await numberOfPetsInSharedRoom(date);
-      return numOfPets < sharedRoomCapacity;
+    const sharedRoomPopulation = await Promise.all(
+      allDates.map((date) => numberOfPetsInSharedRoom(date))
+    );
+
+    const dates = allDates.filter((date, idx) => {
+      return sharedRoomPopulation[idx] >= sharedRoomCapacity;
     });
 
     return dates;
   }
 
-  const dates = allDates.filter(
-    async (date) => await existsAvailableRoom(date, room_type_id)
+  const roomAvailability = await Promise.all(
+    allDates.map((date) => existsAvailableRoom(date, room_type_id))
   );
 
+  const dates = allDates.filter((date, idx) => !roomAvailability[idx]);
   return dates;
 };
 

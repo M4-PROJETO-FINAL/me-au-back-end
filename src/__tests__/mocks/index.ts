@@ -1,6 +1,6 @@
 import { IEditPet, IPetRequest } from "../../interfaces/pets/index";
 import { IReservationRequest } from "../../interfaces/reservations";
-import { IReviewRequest } from "../../interfaces/reviews/index";
+import { IReviewRequest, IEditReview } from "../../interfaces/reviews/index";
 import { IUserLogin, IUserRequest } from "../../interfaces/users/index";
 
 export const mockedUser: IUserRequest = {
@@ -37,6 +37,11 @@ export const mockedReview: IReviewRequest = {
   review_text: "Adorei a equipe, super simpática e ótimo atendimento!",
   stars: 5,
   reservation_id: "",
+};
+
+export const mockedEditReview: IEditReview = {
+  review_text: "Meu filho amou ficar com vocês!",
+  stars: 5,
 };
 
 export const mockedReviewInvalidStarZero: IReviewRequest = {
@@ -84,8 +89,8 @@ export const mockedEditPet: IEditPet = {
 };
 
 export const mockedReservation: IReservationRequest = {
-  checkin: "2022-08-20",
-  checkout: "2022-08-23",
+  checkin: "2025-12-20",
+  checkout: "2025-12-23",
   pet_rooms: [
     {
       pet_id: "1234",

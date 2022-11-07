@@ -1,3 +1,4 @@
+import { RoomType } from "./../../entities/roomType.entity";
 import { Reservation } from "./../../entities/reservation.entity";
 import AppDataSource from "../../data-source";
 import { IReservationRequest } from "./../../interfaces/reservations/index";
@@ -10,6 +11,7 @@ import { AppError } from "../../errors/appError";
 import { IPetRoom } from "../../interfaces/rooms";
 import { IService } from "../../interfaces/services";
 import { getAvailableRoom } from "../rooms/auxiliaryFunctions/roomAvailability";
+import { Room } from "../../entities/room.entity";
 
 export const ReservationCreateService = async (
   user_id: string,
@@ -78,16 +80,99 @@ async function makeReservationPets(
   const petRepository = AppDataSource.getRepository(Pet);
   const allPets = await petRepository.find();
 
+  // filter types
+  const roomTypesRepository = AppDataSource.getRepository(RoomType);
+  const roomTypes = await roomTypesRepository.find();
+
+  const catRoomId = roomTypes.find(
+    (e) => e.title === "Quarto Privativo (gatos)"
+  )?.id;
+  const dogRoomId = roomTypes.find(
+    (e) => e.title === "Quarto Privativo (cães)"
+  )?.id;
+  const sharedRoomId = roomTypes.find(
+    (e) => e.title === "Quarto Compartilhado"
+  )?.id;
+
+  const petRoomsForCat = pet_rooms.filter(
+    ({ room_type_id }) => catRoomId === room_type_id
+  );
+  const petRoomsForDog = pet_rooms.filter(
+    ({ room_type_id }) => dogRoomId === room_type_id
+  );
+  const petRoomsShared = pet_rooms.filter(
+    ({ room_type_id }) => sharedRoomId === room_type_id
+  );
+
   const allReservationPets: ReservationPet[] = [];
-  for (let i = 0; i < pet_rooms.length; i++) {
-    const petRoom = pet_rooms[i];
+
+  let numberOfPetsInTheRoom = 0;
+  let availableRoom: any;
+
+  for (let i = 0; i < petRoomsForCat.length; i++) {
+    const petRoom = petRoomsForCat[i];
 
     const currentPet = allPets.find((pet) => pet.id === petRoom.pet_id);
-    const availableRoom = await getAvailableRoom(
+
+    if (numberOfPetsInTheRoom === 2 || i === 0) {
+      availableRoom = await getAvailableRoom(
+        checkin,
+        checkout,
+        petRoom.room_type_id,
+        allReservationPets
+      );
+      numberOfPetsInTheRoom = 0;
+    }
+    numberOfPetsInTheRoom++;
+
+    console.log(`cat #${i + 1} being put in room ${availableRoom.id}`);
+
+    const reservationPet = reservationPetRepository.create({
+      pet: currentPet,
+      room: availableRoom,
+    });
+    await reservationPetRepository.save(reservationPet);
+    allReservationPets.push(reservationPet);
+  }
+
+  for (let i = 0; i < petRoomsForDog.length; i++) {
+    const petRoom = petRoomsForDog[i];
+
+    const currentPet = allPets.find((pet) => pet.id === petRoom.pet_id);
+
+    //reset room
+    if (numberOfPetsInTheRoom === 2 || i === 0) {
+      availableRoom = await getAvailableRoom(
+        checkin,
+        checkout,
+        petRoom.room_type_id,
+        allReservationPets
+      );
+      numberOfPetsInTheRoom = 0;
+    }
+    numberOfPetsInTheRoom++;
+
+    console.log(`dog #${i + 1} being put in room ${availableRoom.id}`);
+
+    const reservationPet = reservationPetRepository.create({
+      pet: currentPet,
+      room: availableRoom,
+    });
+    await reservationPetRepository.save(reservationPet);
+    allReservationPets.push(reservationPet);
+  }
+
+  for (let i = 0; i < petRoomsShared.length; i++) {
+    const petRoom = petRoomsShared[i];
+
+    const currentPet = allPets.find((pet) => pet.id === petRoom.pet_id);
+    availableRoom = await getAvailableRoom(
       checkin,
       checkout,
-      petRoom.room_type_id
+      petRoom.room_type_id,
+      allReservationPets
     );
+
     const reservationPet = reservationPetRepository.create({
       pet: currentPet,
       room: availableRoom,
