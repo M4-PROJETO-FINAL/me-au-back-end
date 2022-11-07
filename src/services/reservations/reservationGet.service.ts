@@ -1,52 +1,54 @@
-import AppDataSource from "../../data-source";
-import { Reservation } from "../../entities/reservation.entity";
+import AppDataSource from '../../data-source';
+import { Reservation } from '../../entities/reservation.entity';
 
 const reservationGetService = async (userId: string, isAdm: boolean) => {
-  const reservationRepository = AppDataSource.getRepository(Reservation);
+	const reservationRepository = AppDataSource.getRepository(Reservation);
 
-  let reservations = await reservationRepository.find({
-    relations: {
-      user: true,
-      reservation_pets: {
-        room: {
-          room_type: true,
-        },
-      },
-      reservation_services: {
-        service: true,
-      },
-    },
-  });
+	let reservations = await reservationRepository.find({
+		relations: {
+			user: true,
+			reservation_pets: {
+				room: {
+					room_type: true,
+				},
+			},
+			reservation_services: {
+				service: true,
+			},
+		},
+	});
 
-  if (!isAdm) {
-    reservations = reservations.filter((res) => res.user.id === userId);
-  }
+	if (!isAdm) {
+		reservations = reservations.filter((res) => res.user.id === userId);
+	}
 
-  const treatedReservations = reservations.map((field) => {
-    return {
-      id: field.id,
-      checkin: field.checkin,
-      checkout: field.checkout,
-      status: field.status,
-      created_at: field.created_at,
-      updated_at: field.updated_at,
-      user: field.user,
-      pets_rooms: field.reservation_pets.map((pets_info) => {
-        return {
-          pet_id: pets_info.id,
-          rooms_type_id: pets_info.room.room_type.id,
-        };
-      }),
-      services: field.reservation_services.map((service) => {
-        return {
-          service: service.service?.name,
-          amount: service.amount,
-        };
-      }),
-    };
-  });
+	const treatedReservations = reservations.map((field) => {
+		return {
+			id: field.id,
+			checkin: field.checkin,
+			checkout: field.checkout,
+			status: field.status,
+			created_at: field.created_at,
+			updated_at: field.updated_at,
+			user: field.user,
+			pets_rooms: field.reservation_pets.map((pets_info) => {
+				return {
+					pet_id: pets_info.id,
+					rooms_type_id: pets_info.room.room_type.id,
+					room_name: pets_info.room.room_type.title,
+					room_picture: pets_info.room.room_type.image,
+				};
+			}),
+			services: field.reservation_services.map((service) => {
+				return {
+					service: service.service?.name,
+					amount: service.amount,
+				};
+			}),
+		};
+	});
 
-  return treatedReservations;
+	return treatedReservations;
 };
 
 export default reservationGetService;
