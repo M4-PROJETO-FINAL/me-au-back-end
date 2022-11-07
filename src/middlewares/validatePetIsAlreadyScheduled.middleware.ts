@@ -27,8 +27,8 @@ const validatePetIsAlreadyScheduled = async (
 				(resPet) => resPet?.pet?.id
 			);
 			return (
-				(petIdsInThisRes.includes(currPetId) && res.status === "reserved") ||
-				res.status === "active"
+				petIdsInThisRes.includes(currPetId) &&
+				(res.status === "reserved" || res.status === "active")
 			);
 		});
 
