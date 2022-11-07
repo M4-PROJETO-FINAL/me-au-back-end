@@ -1,5 +1,6 @@
 import AppDataSource from "../../data-source";
 import { Pet } from "../../entities/pet.entity";
+import { Reservation } from "../../entities/reservation.entity";
 import { User } from "../../entities/user.entity";
 import { AppError } from "../../errors/appError";
 
@@ -10,6 +11,26 @@ const petDeleteService = async (
 ) => {
   const petRepository = AppDataSource.getRepository(Pet);
   const userRepository = AppDataSource.getRepository(User);
+  const reservationRepository = AppDataSource.getRepository(Reservation);
+  const petReservations = await reservationRepository.find({
+    relations: {
+      reservation_pets: {
+        pet: true,
+      },
+    },
+    where: {
+      reservation_pets: {
+        pet: {
+          id: petId,
+        },
+      },
+    },
+  });
+
+  if (petReservations.length > 0)
+    throw new AppError(
+      "Cannot delete a pet which has already been booked in a reservation"
+    );
 
   const pets = await petRepository.find({ relations: { user: true } });
 

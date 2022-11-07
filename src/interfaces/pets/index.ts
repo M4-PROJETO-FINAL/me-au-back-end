@@ -1,3 +1,5 @@
+import { User } from "../../entities/user.entity";
+
 export interface IPetRequest {
   name: string;
   type: "dog" | "cat";
@@ -9,6 +11,7 @@ export interface IPetRequest {
 
 export interface IPet extends IPetRequest {
   id: string;
+  user?: User;
 }
 
 export interface IEditPet {
@@ -16,4 +19,8 @@ export interface IEditPet {
   neutered?: boolean;
   vaccinated?: boolean;
   docile?: boolean;
+}
+
+export interface IPetAdminResponse extends IPet {
+  owner: User;
 }

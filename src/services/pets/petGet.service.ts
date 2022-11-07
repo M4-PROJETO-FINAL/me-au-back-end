@@ -1,8 +1,9 @@
+import { instanceToPlain } from "class-transformer";
 import AppDataSource from "../../data-source";
 import { Pet } from "../../entities/pet.entity";
 import { User } from "../../entities/user.entity";
 import { AppError } from "../../errors/appError";
-import { IPet } from "../../interfaces/pets";
+import { IPet, IPetAdminResponse } from "../../interfaces/pets";
 
 const petGetService = async (userId: string, isAdm: boolean) => {
   const petRepository = AppDataSource.getRepository(Pet);
@@ -12,8 +13,18 @@ const petGetService = async (userId: string, isAdm: boolean) => {
 
   let pets: IPet[];
   if (isAdm) {
-    pets = await petRepository.find();
-    return pets;
+    pets = await petRepository.find({
+      relations: {
+        user: true,
+      },
+    });
+    const treatedPets: IPetAdminResponse[] = pets.map((pet) => {
+      let newPet: IPetAdminResponse;
+      newPet = { ...pet, owner: instanceToPlain(pet.user) as User };
+      delete newPet.user;
+      return newPet;
+    });
+    return treatedPets;
   }
   pets = await petRepository.find({
     where: {
