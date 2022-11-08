@@ -1,44 +1,42 @@
-import { Reservation } from "../../entities/reservation.entity";
-import AppDataSource from "../../data-source";
-import { AppError } from "../../errors/appError";
+import { Reservation } from '../../entities/reservation.entity';
+import AppDataSource from '../../data-source';
+import { AppError } from '../../errors/appError';
 
 const reservationDeleteService = async (
-  reservationId: string,
-  userId: string,
-  isAdm: boolean
+	reservationId: string,
+	userId: string,
+	isAdm: boolean
 ) => {
-  const reservationRepository = AppDataSource.getRepository(Reservation);
+	const reservationRepository = AppDataSource.getRepository(Reservation);
 
-  const reservations = await reservationRepository.find({
-    where: {
-      id: reservationId,
-    },
-    relations: {
-      user: true,
-    },
-  });
+	const reservations = await reservationRepository.find({relations: {user: true}});
 
-  if (reservations.length === 0) {
-    throw new AppError("Reservation does not exists", 404);
-  }
-  const reservation = reservations[0];
+  const reservation = reservations.find((reservation) => reservation.id === reservationId);
 
-  if (reservation.status === "cancelled") {
-    throw new AppError("Reservation does not exist");
+  if(!reservation) {
+    throw new AppError('Reservation does not exists', 404)
   }
 
-  const ownerId = reservation.user.id;
-  if (userId !== ownerId && !isAdm)
-    throw new AppError(
-      "Cannot delete this reservation without admin permissions",
-      403
-    );
+	if (reservations.length === 0) {
+		throw new AppError('Reservation does not exists', 404);
+	}
 
-  await reservationRepository.update(reservation.id, {
-    status: (reservation.status = "cancelled"),
-  });
+	if (reservation.status === 'cancelled') {
+		throw new AppError('Reservation does not exist', 400);
+	}
 
-  return reservation;
+	const ownerId = reservation.user.id;
+	if (userId !== ownerId && !isAdm)
+		throw new AppError(
+			'Cannot delete this reservation without admin permissions',
+			403
+		);
+
+	await reservationRepository.update(reservation.id, {
+		status: (reservation.status = 'cancelled'),
+	});
+
+	return reservation;
 };
 
 export default reservationDeleteService;
