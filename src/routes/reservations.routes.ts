@@ -10,6 +10,7 @@ import validateRequestReservationIds from "../middlewares/validateRequestReserva
 import validateIsCatOrDogMiddleware from "../middlewares/validateIsDogOrCat.middleware";
 import validatePetIsAlreadyScheduled from "../middlewares/validatePetIsAlreadyScheduled.middleware";
 import verifyDates from "../middlewares/verifyDates.middleware";
+import updateReservationStatus from "../middlewares/updateReservationStatus.middleware";
 
 const routes = Router();
 
