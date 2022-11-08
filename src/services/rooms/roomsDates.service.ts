@@ -1,53 +1,53 @@
-import AppDataSource from "../../data-source";
-import { RoomType } from "../../entities/roomType.entity";
-import { AppError } from "../../errors/appError";
-import { getDatesInRange, getMinAndMaxDates } from "./auxiliaryFunctions/dates";
+import AppDataSource from '../../data-source';
+import { RoomType } from '../../entities/roomType.entity';
+import { AppError } from '../../errors/appError';
+import { getDatesInRange, getMinAndMaxDates } from './auxiliaryFunctions/dates';
 import {
-  existsAvailableRoom,
-  getAllReservationsOfAGivenRoomType,
-  numberOfPetsInSharedRoom,
-} from "./auxiliaryFunctions/roomAvailability";
+	existsAvailableRoom,
+	getAllReservationsOfAGivenRoomType,
+	numberOfPetsInSharedRoom,
+} from './auxiliaryFunctions/roomAvailability';
 
 const roomsDatesService = async (room_type_id: string) => {
-  // retorna um array com todas as datas em que não há NENHUM quarto do tipo desejado diponível
+	// retorna um array com todas as datas em que não há NENHUM quarto do tipo desejado diponível
+	const roomTypesRepository = AppDataSource.getRepository(RoomType);
 
-  const roomTypesRepository = AppDataSource.getRepository(RoomType);
-  const roomType = await roomTypesRepository.findOneBy({
-    id: room_type_id,
-  });
+	const roomTypeSearch = await roomTypesRepository.find();
 
-  if (!roomType) throw new AppError("Invalid room type");
+  const roomType = roomTypeSearch.find((room) => room.id === room_type_id)
 
-  const reservationsOfSameRoomType = await getAllReservationsOfAGivenRoomType(
-    room_type_id
-  );
+	if (!roomType) throw new AppError('Invalid room type');
 
-  const [minCheckin, maxCheckout] = getMinAndMaxDates(
-    reservationsOfSameRoomType
-  );
+	const reservationsOfSameRoomType = await getAllReservationsOfAGivenRoomType(
+		room_type_id
+	);
 
-  const allDates = getDatesInRange(minCheckin, maxCheckout);
+	const [minCheckin, maxCheckout] = getMinAndMaxDates(
+		reservationsOfSameRoomType
+	);
 
-  if (roomType.title === "Quarto Compartilhado") {
-    const sharedRoomCapacity = roomType.capacity;
+	const allDates = getDatesInRange(minCheckin, maxCheckout);
 
-    const sharedRoomPopulation = await Promise.all(
-      allDates.map((date) => numberOfPetsInSharedRoom(date))
-    );
+	if (roomType.title === 'Quarto Compartilhado') {
+		const sharedRoomCapacity = roomType.capacity;
 
-    const dates = allDates.filter((date, idx) => {
-      return sharedRoomPopulation[idx] >= sharedRoomCapacity;
-    });
+		const sharedRoomPopulation = await Promise.all(
+			allDates.map((date) => numberOfPetsInSharedRoom(date))
+		);
 
-    return dates;
-  }
+		const dates = allDates.filter((date, idx) => {
+			return sharedRoomPopulation[idx] >= sharedRoomCapacity;
+		});
 
-  const roomAvailability = await Promise.all(
-    allDates.map((date) => existsAvailableRoom(date, room_type_id))
-  );
+		return dates;
+	}
 
-  const dates = allDates.filter((date, idx) => !roomAvailability[idx]);
-  return dates;
+	const roomAvailability = await Promise.all(
+		allDates.map((date) => existsAvailableRoom(date, room_type_id))
+	);
+
+	const dates = allDates.filter((date, idx) => !roomAvailability[idx]);
+	return dates;
 };
 
 export default roomsDatesService;
