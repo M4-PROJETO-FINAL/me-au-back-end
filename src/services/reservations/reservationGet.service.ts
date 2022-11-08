@@ -35,8 +35,6 @@ const reservationGetService = async (userId: string, isAdm: boolean) => {
 				return {
 					pet_id: pets_info.id,
 					rooms_type_id: pets_info.room.room_type.id,
-					room_name: pets_info.room.room_type.title,
-					room_picture: pets_info.room.room_type.image,
 				};
 			}),
 			services: field.reservation_services.map((service) => {

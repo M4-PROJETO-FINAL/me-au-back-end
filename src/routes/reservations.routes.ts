@@ -10,24 +10,26 @@ import validateRequestReservationIds from "../middlewares/validateRequestReserva
 import validateIsCatOrDogMiddleware from "../middlewares/validateIsDogOrCat.middleware";
 import validatePetIsAlreadyScheduled from "../middlewares/validatePetIsAlreadyScheduled.middleware";
 import verifyDates from "../middlewares/verifyDates.middleware";
-import updateReservationStatus from "../middlewares/updateReservationStatus.middleware";
+import validatePetsReservationMiddleware from "../middlewares/validatePetsReservation.middleware";
+
 
 const routes = Router();
 
 export const reservationRoutes = () => {
-  routes.get("", authUser, reservationGetController);
-  routes.get("/:id", authUser, reservationGetOneController);
-  routes.post(
-    "",
-    authUser,
-    validateCheckinCheckoutDates,
-    validateRequestReservationIds,
-    validateIsCatOrDogMiddleware,
-    validatePetIsAlreadyScheduled,
-    verifyDates,
-    reservationCreateController
-  );
-  routes.delete("/:id", authUser, reservationDeleteController);
+	routes.get("", authUser, reservationGetController);
+	routes.get("/:id", authUser, reservationGetOneController);
+	routes.post(
+		"",
+		authUser,
+		validateCheckinCheckoutDates,
+		validateRequestReservationIds,
+		validateIsCatOrDogMiddleware,
+		validatePetIsAlreadyScheduled,
+		validatePetsReservationMiddleware,
+		verifyDates,
+		reservationCreateController
+	);
+	routes.delete("/:id", authUser, reservationDeleteController);
 
-  return routes;
+	return routes;
 };
