@@ -31,8 +31,15 @@ const reviewEditService = async (
     review_text,
     stars,
   });
-  const reviewUpdate = reviewRepository.findOneBy({
-    id: reviewId,
+
+  const reviewUpdate = reviewRepository.find({
+    where: {
+      id: reviewId,
+    },
+    relations: {
+      user: true,
+      reservation: true,
+    },
   });
 
   return reviewUpdate;
