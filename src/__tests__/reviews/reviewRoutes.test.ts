@@ -191,11 +191,11 @@ describe("/reviews", () => {
       .set("Authorization", `Bearer ${loginResponse.body.token}`)
       .send(mockedEditReview);
 
-    expect(response.body).toHaveProperty("id");
-    expect(response.body).toHaveProperty("review_text");
-    expect(response.body).toHaveProperty("stars");
-    expect(response.body.review_text).toEqual(mockedEditReview.review_text);
-    expect(response.body.stars).toEqual(mockedEditReview.stars);
+    expect(response.body[0]).toHaveProperty("id");
+    expect(response.body[0]).toHaveProperty("review_text");
+    expect(response.body[0]).toHaveProperty("stars");
+    expect(response.body[0].review_text).toEqual(mockedEditReview.review_text);
+    expect(response.body[0].stars).toEqual(mockedEditReview.stars);
     expect(response.status).toBe(200);
   });
 
@@ -227,11 +227,11 @@ describe("/reviews", () => {
       .set("Authorization", `Bearer ${loginResponse.body.token}`)
       .send(mockEditAdmin);
 
-    expect(response.body).toHaveProperty("id");
-    expect(response.body).toHaveProperty("review_text");
-    expect(response.body).toHaveProperty("stars");
-    expect(response.body.review_text).toEqual(mockEditAdmin.review_text);
-    expect(response.body.stars).toEqual(mockEditAdmin.stars);
+    expect(response.body[0]).toHaveProperty("id");
+    expect(response.body[0]).toHaveProperty("review_text");
+    expect(response.body[0]).toHaveProperty("stars");
+    expect(response.body[0].review_text).toEqual(mockEditAdmin.review_text);
+    expect(response.body[0].stars).toEqual(mockEditAdmin.stars);
     expect(response.status).toBe(200);
   });
 

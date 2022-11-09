@@ -26,13 +26,19 @@ const reviewEditService = async (
     throw new AppError("You don't have permission!", 403);
   }
 
-  // funcionando o update
   await reviewRepository.update(reviewId, {
     review_text,
     stars,
   });
-  const reviewUpdate = reviewRepository.findOneBy({
-    id: reviewId,
+
+  const reviewUpdate = reviewRepository.find({
+    where: {
+      id: reviewId,
+    },
+    relations: {
+      user: true,
+      reservation: true,
+    },
   });
 
   return reviewUpdate;

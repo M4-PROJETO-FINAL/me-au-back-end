@@ -1,4 +1,5 @@
 import { Express } from "express";
+import updateReservationStatus from "../middlewares/updateReservationStatus.middleware";
 import { petsRoutes } from "./pets.routes";
 import { reservationRoutes } from "./reservations.routes";
 import { reviewRoutes } from "./reviews.routes";
