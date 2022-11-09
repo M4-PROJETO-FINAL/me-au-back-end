@@ -10,9 +10,9 @@ const reviewGetService = async () => {
   reviews = await reviewRepository.find({
     relations: {
       user: true,
+      reservation: true,
     },
   });
-
   return reviews;
 };
 

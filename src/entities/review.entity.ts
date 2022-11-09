@@ -17,7 +17,7 @@ export class Review {
   @Column()
   review_text: string;
 
-  @Column({ type: "decimal", precision: 2, scale: 1 })
+  @Column({ type: "decimal", precision: 2, scale: 1, nullable: true })
   stars: number;
 
   @OneToOne(() => Reservation, {
