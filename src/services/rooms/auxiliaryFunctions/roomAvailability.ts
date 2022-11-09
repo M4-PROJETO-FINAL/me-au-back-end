@@ -79,10 +79,12 @@ export const existsAvailableRoom = async (
   date: Date,
   room_type_id: string
 ): Promise<boolean> => {
+  // todas as reservas de quarto de gato
   const reservationsOfSameRoomType = await getAllReservationsOfAGivenRoomType(
     room_type_id
   );
 
+  // todas as reservas de quarto de gato que conflitam com a data
   const reservationsOfSameRoomTypeThatContainDate =
     reservationsOfSameRoomType.filter((res) => {
       const resCheckin = res.checkin.getTime();
@@ -91,7 +93,28 @@ export const existsAvailableRoom = async (
         resCheckin <= date.getTime() && resCheckout > date.getTime();
       return resIncludesDate;
     });
-  return reservationsOfSameRoomTypeThatContainDate.length < 4;
+
+  if (reservationsOfSameRoomTypeThatContainDate.length >= 4) {
+    return false;
+  }
+
+  const actualAmountOfOccupiedRooms =
+    reservationsOfSameRoomTypeThatContainDate.reduce((total, res) => {
+      const resPets = res.reservation_pets;
+      const occupiedRoomsIds: string[] = [];
+      resPets.forEach((resPet) => {
+        if (
+          resPet.room.room_type.id === room_type_id &&
+          !occupiedRoomsIds.includes(resPet.room.id)
+        ) {
+          occupiedRoomsIds.push(resPet.room.id);
+        }
+      });
+
+      return total + occupiedRoomsIds.length;
+    }, 0);
+
+  return actualAmountOfOccupiedRooms < 4;
 };
 
 /**
