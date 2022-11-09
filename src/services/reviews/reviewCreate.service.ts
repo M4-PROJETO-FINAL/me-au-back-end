@@ -35,11 +35,6 @@ const reviewCreateService = async (
     throw new AppError("Reservation not found!", 401);
   }
 
-  // descomentar assim que a reservation tiver a atualização automatica!
-  // if (validadeReservation.status !== "concluded") {
-  //   throw new AppError("This reservarion is not concluded!", 401);
-  // }
-
   const isAlreadyReview = allReviews.find(
     (el) => el.reservation.id === newReviewData.reservation_id
   );

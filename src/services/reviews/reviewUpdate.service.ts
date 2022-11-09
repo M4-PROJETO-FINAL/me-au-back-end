@@ -26,7 +26,6 @@ const reviewEditService = async (
     throw new AppError("You don't have permission!", 403);
   }
 
-  // funcionando o update
   await reviewRepository.update(reviewId, {
     review_text,
     stars,
